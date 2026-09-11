@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Busmap Interattivo — Comune di Monterotondo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #1A56A4;
+  --blue-dark: #0D3270;
+  --blue-mid: #2368C4;
+  --blue-light: #E8F0FB;
+  --gold: #F5D000;
+  --gold-light: #FFF3DC;
+  --line-color: #1A56A4;
+  --border: #DDE3EE;
+  --text-primary: #0D1B2A;
+  --text-muted: #6B7A8F;
+  --bg-page: #2a2a3a;
+}
+
+/* ═══════════════════════════════════════
+   BASE (mobile-first)
+═══════════════════════════════════════ */
+body {
+  background: var(--bg-page);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 32px 16px 60px;
+  font-family: 'Barlow', sans-serif;
+}
+
+/* ─── CARD SHELL ─── */
+.card {
+  width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+}
+
+/* ─── APP TITLE ─── */
+.app-title-bar {
+  background: #071c42;
+  padding: 14px 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.app-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800; font-size: 18px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--gold);
+}
+.app-subtitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-top: 3px;
+}
+
+/* ─── LINE SELECTOR ─── */
+.line-select-bar {
+  background: #071c42;
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.line-select-btn {
+  flex: 1;
+  min-width: 90px;
+  padding: 9px 10px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800; font-size: 14px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.18s;
+}
+.line-select-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--blue-dark);
+}
+
+/* ─── HEADER ─── */
+.header {
+  background: var(--blue-dark);
+  padding: 20px 20px 0;
+  position: relative;
+}
+.comune-logo-block {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.comune-logo-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 12px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+  padding-bottom: 6px;
+}
+.comune-logo {
+  height: 110px;
+  width: auto;
+  opacity: 1;
+}
+.footer-logo-block {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.footer-logo-block .comune-logo-label {
+  color: rgba(255,255,255,0.7);
+}
+.footer-logo-block .comune-logo {
+  height: 60px;
+}
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.line-badge {
+  background: var(--gold);
+  color: var(--blue-dark);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 42px;
+  width: 62px; height: 62px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.header-info { flex: 1; }
+.header-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600; font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.45); margin-bottom: 4px;
+}
+.header-route {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800; font-size: 18px;
+  line-height: 1.15; color: #fff; text-transform: uppercase;
+}
+.header-route .arrow { color: var(--gold); margin: 0 2px; }
+.header-sub {
+  font-size: 11.5px; color: rgba(255,255,255,0.5);
+  margin-top: 4px; line-height: 1.4; font-style: italic;
+}
+
+/* ─── DIRECTION TOGGLE ─── */
+.dir-toggle-bar {
+  display: flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 10px;
+}
+.dir-toggle-btn {
+  flex: 1; padding: 9px 10px;
+  border: none; border-radius: 6px;
+  background: transparent; color: rgba(255,255,255,0.55);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 12.5px;
+  letter-spacing: 0.03em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.18s;
+}
+.dir-toggle-btn.active { background: var(--gold); color: var(--blue-dark); }
+.dir-toggle-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.no-data-note {
+  background: rgba(245,166,35,0.15);
+  border: 1px solid rgba(245,166,35,0.4);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #FFD98A;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  display: none;
+}
+.no-data-note.visible { display: block; }
+
+/* ─── TOGGLE (mobile only) ─── */
+.toggle-bar {
+  display: flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 16px;
+}
+.toggle-btn {
+  flex: 1; padding: 8px 10px;
+  border: none; border-radius: 6px;
+  background: transparent; color: rgba(255,255,255,0.55);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 13px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.18s;
+}
+.toggle-btn.active { background: #fff; color: var(--blue-dark); }
+
+/* ─── VALIDITY STRIP ─── */
+.validity-strip {
+  background: var(--blue-mid);
+  padding: 6px 20px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600; font-size: 10.5px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  display: flex; align-items: center; gap: 6px;
+}
+.validity-strip::before {
+  content: ''; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--gold); flex-shrink: 0;
+}
+
+/* ─── DEPARTURES SUMMARY (mobile) ─── */
+.dep-summary {
+  background: var(--blue-light);
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.dep-summary-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 7px;
+}
+.dep-times-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+.dep-chip {
+  background: var(--blue-dark); color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 13px;
+  padding: 4px 9px; border-radius: 4px;
+}
+
+/* ─── STOPS LIST (mobile layout) ─── */
+.stops-outer {
+  padding: 12px 0 20px;
+  position: relative;
+}
+
+.stop-row {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  padding: 0 20px;
+  min-height: 52px;
+}
+.stop-row::before {
+  content: '';
+  position: absolute;
+  left: 35px; top: 0; bottom: 0;
+  width: 3px; background: var(--line-color); z-index: 0;
+}
+.stop-row:first-child::before { top: 26px; }
+.stop-row:last-child::before  { bottom: calc(100% - 26px); }
+
+.dot-col {
+  width: 30px;
+  display: flex; justify-content: center; align-items: flex-start;
+  padding-top: 14px;
+  position: relative; z-index: 1; flex-shrink: 0;
+}
+.dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--line-color);
+  background: #fff;
+}
+.dot.terminal {
+  width: 22px; height: 22px;
+  background: var(--blue-dark); border-color: var(--blue-dark);
+  box-shadow: 0 0 0 3px rgba(13,50,112,0.2);
+}
+.dot.key {
+  width: 16px; height: 16px;
+  background: var(--gold); border-color: var(--gold);
+}
+
+.stop-content {
+  flex: 1;
+  padding: 8px 0 8px 14px;
+  border-bottom: 1px solid #EEF1F7;
+}
+.stop-row:last-child .stop-content { border-bottom: none; }
+
+.stop-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 15px;
+  color: var(--text-primary); text-transform: uppercase;
+  letter-spacing: 0.02em; line-height: 1.15; margin-bottom: 5px;
+}
+.stop-row.is-terminal .stop-name { font-size: 16px; color: var(--blue-dark); font-weight: 900; }
+.stop-row.is-key .stop-name { color: #7A4700; }
+
+/* Mobile: mostra solo il giorno attivo */
+.times-lv, .times-sab {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.times-sab { display: none; }
+
+.t-chip {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600; font-size: 12px;
+  padding: 2px 7px; border-radius: 3px;
+  background: var(--blue-light); color: var(--blue-dark);
+}
+.stop-row.is-terminal .t-chip {
+  background: var(--blue-dark); color: #fff;
+  font-size: 13px; padding: 3px 9px;
+}
+.stop-row.is-key .t-chip { background: var(--gold-light); color: #7A4700; }
+
+/* ─── LEGEND ─── */
+.legend {
+  background: #F8F9FC;
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text-muted);
+}
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+/* ─── FOOTER ─── */
+.footer {
+  background: var(--blue-dark);
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-comune {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+.footer-source {
+  font-size: 10px; color: rgba(255,255,255,0.3);
+  text-align: right; line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════
+   DESKTOP (≥ 769px) — layout a 2 colonne
+═══════════════════════════════════════ */
+@media (min-width: 769px) {
+
+  body {
+    padding: 0;
+    align-items: stretch;
+    background: #f0f2f7;
+  }
+
+  .card {
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    display: grid;
+    grid-template-rows: auto auto auto auto 1fr auto auto;
+    min-height: 100vh;
+  }
+
+  .line-select-bar { padding: 12px 32px; }
+  .line-select-btn { flex: none; min-width: 120px; font-size: 15px; }
+
+  /* Header più compatto */
+  .header {
+    padding: 18px 32px 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--blue-dark);
+    position: relative;
+  }
+  .comune-logo {
+    height: 110px;
+  }
+  .header-top { margin-bottom: 12px; gap: 16px; }
+  .line-badge { width: 70px; height: 70px; font-size: 48px; }
+  .header-route { font-size: 22px; }
+  .header-sub { font-size: 12px; }
+
+  /* Direction toggle rimane visibile anche su desktop */
+  .dir-toggle-bar { max-width: 460px; margin-bottom: 14px; }
+  .no-data-note { max-width: 460px; }
+
+  /* Nascondi toggle giorno su desktop */
+  .toggle-bar { display: none; }
+
+  /* Validity più sottile */
+  .validity-strip { padding: 6px 32px; }
+
+  /* Nascondi dep-summary mobile su desktop */
+  .dep-summary { display: none; }
+
+  /* ── TAVOLA DESKTOP ── */
+  .stops-outer {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stops-outer::before {
+    content: '';
+    display: block;
+  }
+
+  .stop-row {
+    padding: 0 32px 0 32px;
+    min-height: 0;
+    border-bottom: 1px solid #EEF1F7;
+    align-items: stretch;
+  }
+  .stop-row:last-child { border-bottom: none; }
+
+  .stop-row::before { display: none; }
+
+  .dot-col {
+    width: 44px;
+    padding-top: 0;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .dot-col::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--line-color);
+    transform: translateX(-50%);
+    z-index: 0;
+  }
+  .stop-row:first-child .dot-col::before { top: 50%; }
+  .stop-row:last-child  .dot-col::before { bottom: 50%; }
+  .dot { position: relative; z-index: 1; }
+
+  .stop-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 8px 0 8px 16px;
+    border-bottom: none;
+    gap: 0;
+  }
+
+  .stop-name {
+    width: 200px;
+    flex-shrink: 0;
+    font-size: 12.5px;
+    margin-bottom: 0;
+    padding-right: 12px;
+    border-right: 1px solid #EEF1F7;
+  }
+  .stop-row.is-terminal .stop-name { font-size: 13px; }
+
+  .times-lv, .times-sab {
+    flex: 1;
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 3px;
+    padding: 4px 12px;
+    align-content: center;
+  }
+  .times-lv { border-right: 2px solid #DDE3EE; }
+
+  .t-chip { font-size: 13px; padding: 2px 8px; }
+  .stop-row.is-terminal .t-chip { font-size: 14px; padding: 3px 10px; }
+
+  .table-header {
+    display: flex;
+    align-items: center;
+    background: var(--blue-dark);
+    padding: 8px 32px 8px calc(32px + 44px + 16px);
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+  .th-name {
+    width: 200px; flex-shrink: 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    padding-right: 12px; border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .th-day {
+    flex: 1; padding: 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .th-day + .th-day { border-left: 2px solid rgba(255,255,255,0.1); }
+  .th-pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 4px;
+  }
+  .th-pill.lv  { background: var(--blue); color: #fff; }
+  .th-pill.sab { background: var(--gold); color: var(--blue-dark); }
+  .th-count {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+
+  .legend { padding: 10px 32px; gap: 24px; }
+  .footer { padding: 10px 32px; }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- TITOLO -->
+  <div class="app-title-bar">
+    <div class="app-title">Busmap Interattivo</div>
+    <div class="app-subtitle">Realizzato da</div>
+    <div class="app-subtitle">Comune di Monterotondo</div>
+  </div>
+
+  <!-- SELETTORE LINEA -->
+  <div class="line-select-bar" id="line-select-bar"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="line-badge" id="line-badge">3</div>
+      <div class="header-info">
+        <div class="header-label">Linea interurbana · UDR Provincia di Roma</div>
+        <div class="header-route" id="header-route">
+          Fonte Nuova <span class="arrow">→</span> Monterotondo Stazione
+        </div>
+        <div class="header-sub" id="header-sub">Con passaggio nel comune di Mentana</div>
+      </div>
+      <div class="comune-logo-block">
+        <div class="comune-logo-label">Realizzato da</div>
+        <img src="https://ERETINI-A-4-ZAMPE-CDN.b-cdn.net/SITE%20ASSETS%20E%20LOGHI/logo-comune%20generale%20negativo-trasparente.png"
+             class="comune-logo" alt="Comune di Monterotondo">
+      </div>
+    </div>
+
+    <!-- TOGGLE DIREZIONE (Andata / Ritorno) -->
+    <div class="dir-toggle-bar">
+      <button class="dir-toggle-btn active" id="btn-andata" onclick="setDirection('andata')">Andata</button>
+      <button class="dir-toggle-btn" id="btn-ritorno" onclick="setDirection('ritorno')">Ritorno</button>
+    </div>
+    <div class="no-data-note" id="no-data-note">
+      Dati orari di ritorno non ancora disponibili per questa linea — verranno aggiunti appena forniti.
+    </div>
+
+    <div class="toggle-bar">
+      <button class="toggle-btn active" id="btn-lv" onclick="setDay('lv')">🗓 Lun — Ven</button>
+      <button class="toggle-btn" id="btn-sab" onclick="setDay('sab')">📅 Sabato</button>
+    </div>
+  </div>
+
+  <!-- VALIDITY -->
+  <div class="validity-strip">
+    Orari invernali &nbsp;·&nbsp; 14 settembre 2026 — 8 giugno 2027
+  </div>
+
+  <!-- INTESTAZIONE COLONNE (solo desktop, iniettata via JS) -->
+  <div class="table-header" id="table-header" style="display:none">
+    <div class="th-name">Fermata</div>
+    <div class="th-day"><span class="th-pill lv">Lun — Ven</span><span class="th-count" id="th-count-lv">11 corse</span></div>
+    <div class="th-day"><span class="th-pill sab">Sabato</span><span class="th-count" id="th-count-sab">7 corse</span></div>
+  </div>
+
+  <!-- PARTENZE (mobile) -->
+  <div class="dep-summary">
+    <div class="dep-summary-label" id="dep-label">Partenze da Fonte Nuova (Fiamme Gialle) · Lun—Ven</div>
+    <div class="dep-times-grid" id="dep-chips"></div>
+  </div>
+
+  <!-- FERMATE -->
+  <div class="stops-outer" id="stops-list"></div>
+
+  <!-- LEGENDA -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#0D3270;"></div>Capolinea
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#F5A623;"></div>Fermata principale
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#fff;border:2px solid #1A56A4;"></div>Fermata intermedia
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-comune">Comune di Monterotondo</div>
+    <div class="footer-source">Fonte: Astral / Regione Lazio<br>astral.lazio.it</div>
+    <div class="footer-logo-block">
+      <div class="comune-logo-label">Realizzato da</div>
+      <img src="https://ERETINI-A-4-ZAMPE-CDN.b-cdn.net/SITE%20ASSETS%20E%20LOGHI/logo-comune%20generale%20negativo-trasparente.png"
+           class="comune-logo" alt="Comune di Monterotondo">
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════ LINEA 3 ═══════════════════ */
+const linea3_andata = {
+  routeLabel: 'Fonte Nuova <span class="arrow">→</span> Monterotondo Stazione',
+  sub: 'Con passaggio nel comune di Mentana',
+  departures: {
+    lv:  ["05:05","07:10","08:20","10:05","10:45","11:50","13:15","14:20","15:00","17:40","19:25"],
+    sab: ["05:05","07:10","10:05","11:50","14:20","17:40","19:25"]
+  },
+  stops: [
+    { name:"Fonte Nuova (Fiamme Gialle)", type:"terminal",
+      lv:["05:05","07:10","08:20","10:05","10:45","11:50","13:15","14:20","15:00","17:40","19:25"],
+      sab:["05:05","07:10","10:05","11:50","14:20","17:40","19:25"] },
+    { name:"Via Corsica", type:"stop",
+      lv:["05:26","07:31","08:41","10:26","11:06","12:11","13:36","14:41","15:21","18:01","19:46"],
+      sab:["05:26","07:31","10:26","12:11","14:41","18:01","19:46"] },
+    { name:"Via Mazzini", type:"stop",
+      lv:["05:27","07:32","08:42","10:27","11:07","12:12","13:37","14:42","15:22","18:02","19:47"],
+      sab:["05:27","07:32","10:27","12:12","14:42","18:02","19:47"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["05:28","07:33","08:43","10:28","11:08","12:13","13:38","14:43","15:23","18:03","19:48"],
+      sab:["05:28","07:33","10:28","12:13","14:43","18:03","19:48"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["05:29","07:34","08:44","10:29","11:09","12:14","13:39","14:44","15:24","18:04","19:49"],
+      sab:["05:29","07:34","10:29","12:14","14:44","18:04","19:49"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["05:30","07:35","08:45","10:30","11:10","12:15","13:40","14:45","15:25","18:05","19:50"],
+      sab:["05:30","07:35","10:30","12:15","14:45","18:05","19:50"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["05:31","07:36","08:46","10:31","11:11","12:16","13:41","14:46","15:26","18:06","19:51"],
+      sab:["05:31","07:36","10:31","12:16","14:46","18:06","19:51"] },
+    { name:"Piazza Pesciarelli", type:"stop",
+      lv:["05:33","07:38","08:48","10:33","11:13","12:18","13:43","14:48","15:28","18:08","19:53"],
+      sab:["05:33","07:38","10:33","12:18","14:48","18:08","19:53"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["05:35","07:40","08:50","10:35","11:15","12:20","13:45","14:50","15:30","18:10","19:55"],
+      sab:["05:35","07:40","10:35","12:20","14:50","18:10","19:55"] },
+    { name:"Viale Kennedy", type:"key",
+      lv:["05:39","07:44","08:54","10:39","11:19","12:24","13:49","14:54","15:34","18:14","19:59"],
+      sab:["05:39","07:44","10:39","12:24","14:54","18:14","19:59"] },
+    { name:"Viale XXV Aprile", type:"key",
+      lv:["05:40","07:45","08:55","10:40","11:20","12:25","13:50","14:55","15:35","18:15","20:00"],
+      sab:["05:40","07:45","10:40","12:25","14:55","18:15","20:00"] },
+    { name:"Via Gramsci / Via Volturno", type:"stop",
+      lv:["05:41","07:46","08:56","10:41","11:21","12:26","13:51","14:56","15:36","18:16","20:01"],
+      sab:["05:41","07:46","10:41","12:26","14:56","18:16","20:01"] },
+    { name:"Via Gramsci / Monti Sabini", type:"stop",
+      lv:["05:42","07:47","08:57","10:42","11:22","12:27","13:52","14:57","15:37","18:17","20:02"],
+      sab:["05:42","07:47","10:42","12:27","14:57","18:17","20:02"] },
+    { name:"Via Grandi", type:"stop",
+      lv:["05:43","07:48","08:58","10:43","11:23","12:28","13:53","14:58","15:38","18:18","20:03"],
+      sab:["05:43","07:48","10:43","12:28","14:58","18:18","20:03"] },
+    { name:"Via Turati / Via Terminillo", type:"key",
+      lv:["05:45","07:50","09:00","10:45","11:25","12:30","13:55","15:00","15:40","18:20","20:05"],
+      sab:["05:45","07:50","10:45","12:30","15:00","18:20","20:05"] },
+    { name:"Via Turati / Via Nilde Iotti", type:"stop",
+      lv:["05:46","07:51","09:01","10:46","11:26","12:31","13:56","15:01","15:41","18:21","20:06"],
+      sab:["05:46","07:51","10:46","12:31","15:01","18:21","20:06"] },
+    { name:"Scalo (Via Nomentana)", type:"key",
+      lv:["05:47","07:52","09:02","10:47","11:27","12:32","13:57","15:02","15:42","18:22","20:07"],
+      sab:["05:47","07:52","10:47","12:32","15:02","18:22","20:07"] },
+    { name:"Via Salaria / Via Papa Lando I", type:"stop",
+      lv:["05:48","07:53","09:03","10:48","11:28","12:33","13:58","15:03","15:43","18:23","20:08"],
+      sab:["05:48","07:53","10:48","12:33","15:03","18:23","20:08"] },
+    { name:"Via Salaria (Zona Industriale)", type:"stop",
+      lv:["05:49","07:54","09:04","10:49","11:29","12:34","13:59","15:04","15:44","18:24","20:09"],
+      sab:["05:49","07:54","10:49","12:34","15:04","18:24","20:09"] },
+    { name:"Stazione FS Monterotondo", type:"terminal",
+      lv:["05:51","07:56","09:06","10:51","11:31","12:36","14:01","15:06","15:46","18:26","20:11"],
+      sab:["05:51","07:56","10:51","12:36","15:06","18:26","20:11"] }
+  ]
+};
+
+const linea3_ritorno = {
+  routeLabel: 'Monterotondo Stazione <span class="arrow">→</span> Fonte Nuova',
+  sub: 'Con passaggio nel comune di Mentana',
+  departures: {
+    lv:  ["06:05","07:15","08:10","09:20","10:55","12:10","13:25","14:05","15:45","18:30","20:15"],
+    sab: ["06:05","08:10","10:55","13:25","15:45","18:30","20:15"]
+  },
+  stops: [
+    { name:"Stazione FS Monterotondo", type:"terminal",
+      lv:["06:05","07:15","08:10","09:20","10:55","12:10","13:25","14:05","15:45","18:30","20:15"],
+      sab:["06:05","08:10","10:55","13:25","15:45","18:30","20:15"] },
+    { name:"Via Salaria (Zona Industriale)", type:"stop",
+      lv:["06:07","07:17","08:12","09:22","10:57","12:12","13:27","14:07","15:47","18:32","20:17"],
+      sab:["06:07","08:12","10:57","13:27","15:47","18:32","20:17"] },
+    { name:"Via Salaria (Scalo)", type:"stop",
+      lv:["06:09","07:19","08:14","09:24","10:59","12:14","13:29","14:09","15:49","18:34","20:19"],
+      sab:["06:09","08:14","10:59","13:29","15:49","18:34","20:19"] },
+    { name:"Scalo (Via Nomentana)", type:"key",
+      lv:["06:10","07:20","08:15","09:25","11:00","12:15","13:30","14:10","15:50","18:35","20:20"],
+      sab:["06:10","08:15","11:00","13:30","15:50","18:35","20:20"] },
+    { name:"Via Turati / Via Nilde Iotti", type:"stop",
+      lv:["06:11","07:21","08:16","09:26","11:01","12:16","13:31","14:11","15:51","18:36","20:21"],
+      sab:["06:11","08:16","11:01","13:31","15:51","18:36","20:21"] },
+    { name:"Via Turati / Via Terminillo", type:"key",
+      lv:["06:12","07:22","08:17","09:27","11:02","12:17","13:32","14:12","15:52","18:37","20:22"],
+      sab:["06:12","08:17","11:02","13:32","15:52","18:37","20:22"] },
+    { name:"Via Achille Grandi", type:"stop",
+      lv:["06:14","07:24","08:19","09:29","11:04","12:19","13:34","14:14","15:54","18:39","20:24"],
+      sab:["06:14","08:19","11:04","13:34","15:54","18:39","20:24"] },
+    { name:"Via Gramsci / Via Monti Sabini", type:"stop",
+      lv:["06:15","07:25","08:20","09:30","11:05","12:20","13:35","14:15","15:55","18:40","20:25"],
+      sab:["06:15","08:20","11:05","13:35","15:55","18:40","20:25"] },
+    { name:"Via Gramsci / Via Volturno", type:"stop",
+      lv:["06:16","07:26","08:21","09:31","11:06","12:21","13:36","14:16","15:56","18:41","20:26"],
+      sab:["06:16","08:21","11:06","13:36","15:56","18:41","20:26"] },
+    { name:"Arco di San Rocco", type:"stop",
+      lv:["06:17","07:27","08:22","09:32","11:07","12:22","13:37","14:17","15:57","18:42","20:27"],
+      sab:["06:17","08:22","11:07","13:37","15:57","18:42","20:27"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["06:18","07:28","08:23","09:33","11:08","12:23","13:38","14:18","15:58","18:43","20:28"],
+      sab:["06:18","08:23","11:08","13:38","15:58","18:43","20:28"] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop",
+      lv:["06:19","07:29","08:24","09:34","11:09","12:24","13:39","14:19","15:59","18:44","20:29"],
+      sab:["06:19","08:24","11:09","13:39","15:59","18:44","20:29"] },
+    { name:"Viale B. Buozzi / Via Corsica", type:"stop",
+      lv:["06:20","07:30","08:25","09:35","11:10","12:25","13:40","14:20","16:00","18:45","20:30"],
+      sab:["06:20","08:25","11:10","13:40","16:00","18:45","20:30"] },
+    { name:"Via Corsica", type:"stop",
+      lv:["06:21","07:31","08:26","09:36","11:11","12:26","13:41","14:21","16:01","18:46","20:31"],
+      sab:["06:21","08:26","11:11","13:41","16:01","18:46","20:31"] },
+    { name:"Via Mazzini", type:"stop",
+      lv:["06:22","07:32","08:27","09:37","11:12","12:27","13:42","14:22","16:02","18:47","20:32"],
+      sab:["06:22","08:27","11:12","13:42","16:02","18:47","20:32"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["06:23","07:33","08:28","09:38","11:13","12:28","13:43","14:23","16:03","18:48","20:33"],
+      sab:["06:23","08:28","11:13","13:43","16:03","18:48","20:33"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["06:24","07:34","08:29","09:39","11:14","12:29","13:44","14:24","16:04","18:49","20:34"],
+      sab:["06:24","08:29","11:14","13:44","16:04","18:49","20:34"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["06:25","07:35","08:30","09:40","11:15","12:30","13:45","14:25","16:05","18:50","20:35"],
+      sab:["06:25","08:30","11:15","13:45","16:05","18:50","20:35"] },
+    { name:"Piazza Pesciarelli", type:"stop",
+      lv:["06:27","07:37","08:32","09:42","11:17","12:32","13:47","14:27","16:07","18:52","20:37"],
+      sab:["06:27","08:32","11:17","13:47","16:07","18:52","20:37"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["06:29","07:39","08:34","09:44","11:19","12:34","13:49","14:29","16:09","18:54","20:39"],
+      sab:["06:29","08:34","11:19","13:49","16:09","18:54","20:39"] },
+    { name:"Via Di Vittorio", type:"stop",
+      lv:["06:30","07:40","08:35","09:45","11:20","12:35","13:50","14:30","16:10","18:55","20:40"],
+      sab:["06:30","08:35","11:20","13:50","16:10","18:55","20:40"] },
+    { name:"Via Ciceruacchio", type:"stop",
+      lv:["06:31","07:41","08:36","09:46","11:21","12:36","13:51","14:31","16:11","18:56","20:41"],
+      sab:["06:31","08:36","11:21","13:51","16:11","18:56","20:41"] },
+    { name:"Piazza Indipendenza", type:"stop",
+      lv:["06:33","07:43","08:38","09:48","11:23","12:38","13:53","14:33","16:13","18:58","20:43"],
+      sab:["06:33","08:38","11:23","13:53","16:13","18:58","20:43"] },
+    { name:"Via XX Settembre", type:"stop",
+      lv:["06:35","07:45","08:40","09:50","11:25","12:40","13:55","14:35","16:15","19:00","20:45"],
+      sab:["06:35","08:40","11:25","13:55","16:15","19:00","20:45"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["06:36","07:46","08:41","09:51","11:26","12:41","13:56","14:36","16:16","19:01","20:46"],
+      sab:["06:36","08:41","11:26","13:56","16:16","19:01","20:46"] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop",
+      lv:["06:37","07:47","08:42","09:52","11:27","12:42","13:57","14:37","16:17","19:02","20:47"],
+      sab:["06:37","08:42","11:27","13:57","16:17","19:02","20:47"] },
+    { name:"Viale B. Buozzi / Via Corsica", type:"stop",
+      lv:["06:38","07:48","08:43","09:53","11:28","12:43","13:58","14:38","16:18","19:03","20:48"],
+      sab:["06:38","08:43","11:28","13:58","16:18","19:03","20:48"] },
+    { name:"Fonte Nuova (Fiamme Gialle)", type:"terminal",
+      lv:["06:39","07:49","08:44","09:54","11:29","12:44","13:59","14:39","16:19","19:04","20:49"],
+      sab:["06:39","08:44","11:29","13:59","16:19","18:46","19:04","20:49"] }
+  ]
+};
+
+/* ═══════════════════ LINEA 4 ═══════════════════ */
+/* Direzione disponibile: Stazione FS Monterotondo → Via Tacito (Guidonia) */
+const linea4_andata = {
+  routeLabel: 'Stazione FS Monterotondo <span class="arrow">→</span> Via Tacito (Guidonia)',
+  sub: 'Con passaggio nel comune di Fonte Nuova e di Mentana',
+  departures: {
+    lv:  ["06:10","06:55","08:10","09:00","11:05","12:15","14:10"],
+    sab: ["06:10","08:10","11:05","13:00"]
+  },
+  stops: [
+    { name:"Stazione FS Monterotondo", type:"terminal",
+      lv:["06:10","06:55","08:10","09:00","11:05","12:15","14:10"],
+      sab:["06:10","08:10","11:05","13:00"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["06:14","06:59","08:14","09:04","11:09","12:19","14:14"],
+      sab:["06:14","08:14","11:09","13:04"] },
+    { name:"Via dello Stadio", type:"stop",
+      lv:["06:16","07:01","08:16","09:06","11:11","12:21","14:16"],
+      sab:["06:16","08:16","11:11","13:06"] },
+    { name:"Via dello Stadio / Via Sant'Anna di Stazzema", type:"stop",
+      lv:["06:17","07:02","08:17","09:07","11:12","12:22","14:17"],
+      sab:["06:17","08:17","11:12","13:07"] },
+    { name:"Via della Fonte / Piscina Comunale", type:"stop",
+      lv:["06:18","07:03","08:18","09:08","11:13","12:23","14:18"],
+      sab:["06:18","08:18","11:13","13:08"] },
+    { name:"Piazza Pesciarelli", type:"stop",
+      lv:["06:19","07:04","08:19","09:09","11:14","12:24","14:19"],
+      sab:["06:19","08:19","11:14","13:09"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["06:20","07:05","08:20","09:10","11:15","12:25","14:20"],
+      sab:["06:20","08:20","11:15","13:10"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["06:22","07:07","08:22","09:12","11:17","12:27","14:22"],
+      sab:["06:22","08:22","11:17","13:12"] },
+    { name:"Via Di Vittorio", type:"stop",
+      lv:["06:23","07:08","08:23","09:13","11:18","12:28","14:23"],
+      sab:["06:23","08:23","11:18","13:13"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["06:24","07:09","08:24","09:14","11:19","12:29","14:24"],
+      sab:["06:24","08:24","11:19","13:14"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["06:25","07:10","08:25","09:15","11:20","12:30","14:25"],
+      sab:["06:25","08:25","11:20","13:15"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["06:26","07:11","08:26","09:16","11:21","12:31","14:26"],
+      sab:["06:26","08:26","11:21","13:16"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["06:27","07:12","08:27","09:17","11:22","12:32","14:27"],
+      sab:["06:27","08:27","11:22","13:17"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["06:29","07:14","08:29","09:19","11:24","12:34","14:29"],
+      sab:["06:29","08:29","11:24","13:19"] },
+    { name:"Via Di Vittorio", type:"stop",
+      lv:["06:30","07:15","08:30","09:20","11:25","12:35","14:30"],
+      sab:["06:30","08:30","11:25","13:20"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["06:31","07:16","08:31","09:21","11:26","12:36","14:31"],
+      sab:["06:31","08:31","11:26","13:21"] },
+    { name:"Via Ciceruacchio", type:"stop",
+      lv:["06:33","07:18","08:33","09:23","11:28","12:38","14:33"],
+      sab:["06:33","08:33","11:28","13:23"] },
+    { name:"Piazza Indipendenza", type:"stop",
+      lv:["06:34","07:19","08:34","09:24","11:29","12:39","14:34"],
+      sab:["06:34","08:34","11:29","13:24"] },
+    { name:"Via XX Settembre", type:"stop",
+      lv:["06:36","07:21","08:36","09:26","11:31","12:41","14:36"],
+      sab:["06:36","08:36","11:31","13:26"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["06:37","07:22","08:37","09:27","11:32","12:42","14:37"],
+      sab:["06:37","08:37","11:32","13:27"] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop",
+      lv:["06:39","07:24","08:39","09:29","11:34","12:44","14:39"],
+      sab:["06:39","08:39","11:34","13:29"] },
+    { name:"Viale B. Buozzi / Via Corsica", type:"stop",
+      lv:["06:40","07:25","08:40","09:30","11:35","12:45","14:40"],
+      sab:["06:40","08:40","11:35","13:30"] },
+    { name:"Via Tacito (Guidonia)", type:"terminal",
+      lv:["06:42","07:27","08:42","09:32","11:37","12:47","14:42"],
+      sab:["06:42","08:42","11:37","13:32"] }
+  ]
+};
+
+/* Direzione ritorno: Via Tacito (Guidonia) → Stazione FS Monterotondo */
+const linea4_ritorno = {
+  routeLabel: 'Via Tacito (Guidonia) <span class="arrow">→</span> Stazione FS Monterotondo',
+  sub: 'Con passaggio nel comune di Fonte Nuova e di Mentana',
+  departures: {
+    lv:  ["05:20","07:20","08:00","09:40","10:35","12:10","13:15","15:15"],
+    sab: ["05:20","07:20","09:40","12:10"]
+  },
+  stops: [
+    { name:"Via Tacito (Guidonia)", type:"terminal",
+      lv:["05:20","07:20","08:00","09:40","10:35","12:10","13:15","15:15"],
+      sab:["05:20","07:20","09:40","12:10"] },
+    { name:"Via Corsica", type:"stop",
+      lv:["05:47","07:47","08:27","10:07","11:02","12:37","13:42","15:42"],
+      sab:["05:47","07:47","10:07","12:37"] },
+    { name:"Via Mazzini", type:"stop",
+      lv:["05:48","07:48","08:28","10:08","11:03","12:38","13:43","15:43"],
+      sab:["05:48","07:48","10:08","12:38"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["05:50","07:50","08:30","10:10","11:05","12:40","13:45","15:45"],
+      sab:["05:50","07:50","10:10","12:40"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["05:51","07:51","08:31","10:11","11:06","12:41","13:46","15:46"],
+      sab:["05:51","07:51","10:11","12:41"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["05:52","07:52","08:32","10:12","11:07","12:42","13:47","15:47"],
+      sab:["05:52","07:52","10:12","12:42"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["05:53","07:53","08:33","10:13","11:08","12:43","13:48","15:48"],
+      sab:["05:53","07:53","10:13","12:43"] },
+    { name:"Piazza Pesciarelli", type:"stop",
+      lv:["05:54","07:54","08:34","10:14","11:09","12:44","13:49","15:49"],
+      sab:["05:54","07:54","10:14","12:44"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["05:56","07:56","08:36","10:16","11:11","12:46","13:51","15:51"],
+      sab:["05:56","07:56","10:16","12:46"] },
+    { name:"Via Kennedy", type:"stop",
+      lv:["05:59","07:59","08:39","10:19","11:14","12:49","13:54","15:54"],
+      sab:["05:59","07:59","10:19","12:49"] },
+    { name:"Piazza Santa Maria", type:"stop",
+      lv:["06:00","08:00","08:40","10:20","11:15","12:50","13:55","15:55"],
+      sab:["06:00","08:00","10:20","12:50"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["06:02","08:02","08:42","10:22","11:17","12:52","13:57","15:57"],
+      sab:["06:02","08:02","10:22","12:52"] },
+    { name:"Stazione FS Monterotondo", type:"terminal",
+      lv:["06:05","08:05","08:45","10:25","11:20","12:55","14:00","16:00"],
+      sab:["06:05","08:05","10:25","12:55"] }
+  ]
+};
+
+/* ═══════════════════ LINEA 5 ═══════════════════ */
+const linea5_andata = {
+  routeLabel: 'Piazza Pesciarelli <span class="arrow">→</span> Piazza dei Caduti di Nassirya',
+  sub: 'Con passaggio per i comuni di Capena e Castelnuovo di Porto',
+  departures: {
+    lv:  ["05:30","05:45","07:45","08:30","10:45","11:05","12:55","13:35","16:05","16:50","18:40","19:30"],
+    sab: ["05:45","08:30","11:05","13:55","16:50","19:05"]
+  },
+  stops: [
+    { name:"Piazza Pesciarelli", type:"terminal",
+      lv:["05:30","05:45","07:45","08:30","10:45","11:05","12:55","13:35","16:05","16:50","18:40","19:30"],
+      sab:["05:45","08:30","11:05","13:55","16:50","19:05"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["05:32","05:47","07:47","08:32","10:47","11:07","12:57","13:37","16:07","16:52","18:42","19:32"],
+      sab:["05:47","08:32","11:07","13:57","16:52","19:07"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["05:34","05:49","07:49","08:34","10:49","11:09","12:59","13:39","16:09","16:54","18:44","19:34"],
+      sab:["05:49","08:34","11:09","13:59","16:54","19:09"] },
+    { name:"Via Di Vittorio", type:"stop",
+      lv:["05:35","05:50","07:50","08:35","10:50","11:10","13:00","13:40","16:10","16:55","18:45","19:35"],
+      sab:["05:50","08:35","11:10","14:00","16:55","19:10"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["05:36","05:51","07:51","08:36","10:51","11:11","13:01","13:41","16:11","16:56","18:46","19:36"],
+      sab:["05:51","08:36","11:11","14:01","16:56","19:11"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["05:38","05:53","07:53","08:38","10:53","11:13","13:03","13:43","16:13","16:58","18:48","19:38"],
+      sab:["05:53","08:38","11:13","14:03","16:58","19:13"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["05:39","05:54","07:54","08:39","10:54","11:14","13:04","13:44","16:14","16:59","18:49","19:39"],
+      sab:["05:54","08:39","11:14","14:04","16:59","19:14"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["05:40","05:55","07:55","08:40","10:55","11:15","13:05","13:45","16:15","17:00","18:50","19:40"],
+      sab:["05:55","08:40","11:15","14:05","17:00","19:15"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["05:42","05:57","07:57","08:42","10:57","11:17","13:07","13:47","16:17","17:02","18:52","19:42"],
+      sab:["05:57","08:42","11:17","14:07","17:02","19:17"] },
+    { name:"Via Di Vittorio", type:"stop",
+      lv:["05:43","05:58","07:58","08:43","10:58","11:18","13:08","13:48","16:18","17:03","18:53","19:43"],
+      sab:["05:58","08:43","11:18","14:08","17:03","19:18"] },
+    { name:"Via Ciceruacchio", type:"stop",
+      lv:["05:44","05:59","07:59","08:44","10:59","11:19","13:09","13:49","16:19","17:04","18:54","19:44"],
+      sab:["05:59","08:44","11:19","14:09","17:04","19:19"] },
+    { name:"Piazza Indipendenza", type:"stop",
+      lv:["05:46","06:01","08:01","08:46","11:01","11:21","13:11","13:51","16:21","17:06","18:56","19:46"],
+      sab:["06:01","08:46","11:21","14:11","17:06","19:21"] },
+    { name:"Via XX Settembre", type:"stop",
+      lv:["05:48","06:03","08:03","08:48","11:03","11:23","13:13","13:53","16:23","17:08","18:58","19:48"],
+      sab:["06:03","08:48","11:23","14:13","17:08","19:23"] },
+    { name:"Piazza Santa Maria", type:"stop",
+      lv:["05:49","06:04","08:04","08:49","11:04","11:24","13:14","13:54","16:24","17:09","18:59","19:49"],
+      sab:["06:04","08:49","11:24","14:14","17:09","19:24"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["05:51","06:06","08:06","08:51","11:06","11:26","13:16","13:56","16:26","17:11","19:01","19:51"],
+      sab:["06:06","08:51","11:26","14:16","17:11","19:26"] },
+    { name:"Stazione di Monterotondo", type:"key",
+      lv:["05:55","06:10","08:10","08:55","11:10","11:30","13:20","14:00","16:30","17:15","19:05","19:55"],
+      sab:["06:10","08:55","11:30","14:20","17:15","19:30"] },
+    { name:"Via Da Vinci / Amaldi (Q8)", type:"stop",
+      lv:["05:58","06:13","08:13","08:58","11:13","11:33","13:23","14:03","16:33","17:18","19:08","19:58"],
+      sab:["06:13","08:58","11:33","14:23","17:18","19:33"] },
+    { name:"Via Ramarini RT", type:"stop",
+      lv:["05:59","06:14","08:14","08:59","11:14","11:34","13:24","14:04","16:34","17:19","19:09","19:59"],
+      sab:["06:14","08:59","11:34","14:24","17:19","19:34"] },
+    { name:"Piazza dei Caduti di Nassirya", type:"terminal",
+      lv:["06:01","06:16","08:16","09:01","11:16","11:36","13:26","14:06","16:36","17:21","19:11","20:01"],
+      sab:["06:16","09:01","11:36","14:26","17:21","19:36"] }
+  ]
+};
+
+const linea5_ritorno = {
+  routeLabel: 'Piazza dei Caduti di Nassirya <span class="arrow">→</span> Piazza Pesciarelli',
+  sub: 'Con passaggio per i comuni di Capena e Castelnuovo di Porto',
+  departures: {
+    lv:  ["04:40","06:35","07:00","09:16","10:01","11:50","12:25","14:05","15:35","17:15","18:00","20:00"],
+    sab: ["04:40","07:00","10:01","12:25","15:15","18:00"]
+  },
+  stops: [
+    { name:"Piazza dei Caduti di Nassirya", type:"terminal",
+      lv:["04:40","06:35","07:00","09:16","10:01","11:50","12:25","14:05","15:35","17:15","18:00","20:00"],
+      sab:["04:40","07:00","10:01","12:25","15:15","18:00"] },
+    { name:"Via Ramarini RT", type:"stop",
+      lv:["05:16","07:11","07:36","09:52","10:37","12:26","13:01","14:41","16:11","17:51","18:36","20:36"],
+      sab:["05:16","07:36","10:37","13:01","15:51","18:36"] },
+    { name:"Via Leonardo da Vinci / Via A. Meucci", type:"stop",
+      lv:["05:17","07:12","07:37","09:53","10:38","12:27","13:02","14:42","16:12","17:52","18:37","20:37"],
+      sab:["05:17","07:37","10:38","13:02","15:52","18:37"] },
+    { name:"Stazione di Monterotondo", type:"key",
+      lv:["05:19","07:14","07:39","09:55","10:40","12:29","13:04","14:44","16:14","17:54","18:39","20:39"],
+      sab:["05:19","07:39","10:40","13:04","15:54","18:39"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["05:23","07:18","07:43","09:59","10:44","12:33","13:08","14:48","16:18","17:58","18:43","20:43"],
+      sab:["05:23","07:43","10:44","13:08","15:58","18:43"] },
+    { name:"Viale Kennedy", type:"stop",
+      lv:["05:25","07:20","07:45","10:01","10:46","12:35","13:10","14:50","16:20","18:00","18:45","20:45"],
+      sab:["05:25","07:45","10:46","13:10","16:00","18:45"] },
+    { name:"Viale XXV Aprile", type:"stop",
+      lv:["05:26","07:21","07:46","10:02","10:47","12:36","13:11","14:51","16:21","18:01","18:46","20:46"],
+      sab:["05:26","07:46","10:47","13:11","16:01","18:46"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["05:28","07:23","07:48","10:04","10:49","12:38","13:13","14:53","16:23","18:03","18:48","20:48"],
+      sab:["05:28","07:48","10:49","13:13","16:03","18:48"] },
+    { name:"Via Mazzini", type:"stop",
+      lv:["05:30","07:25","07:50","10:06","10:51","12:40","13:15","14:55","16:25","18:05","18:50","20:50"],
+      sab:["05:30","07:50","10:51","13:15","16:05","18:50"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["05:31","07:26","07:51","10:07","10:52","12:41","13:16","14:56","16:26","18:06","18:51","20:51"],
+      sab:["05:31","07:51","10:52","13:16","16:06","18:51"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["05:33","07:28","07:53","10:09","10:54","12:43","13:18","14:58","16:28","18:08","18:53","20:53"],
+      sab:["05:33","07:53","10:54","13:18","16:08","18:53"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["05:35","07:30","07:55","10:11","10:56","12:45","13:20","15:00","16:30","18:10","18:55","20:55"],
+      sab:["05:35","07:55","10:56","13:20","16:10","18:55"] },
+    { name:"Piazza Pesciarelli", type:"terminal",
+      lv:["05:37","07:32","07:57","10:13","10:58","12:47","13:22","15:02","16:32","18:12","18:57","20:57"],
+      sab:["05:37","07:57","10:58","13:22","16:12","18:57"] }
+  ]
+};
+
+/* ═══════════════════ LINEA 30 ═══════════════════ */
+/* Dati estratti automaticamente dal KML pubblico ASTRAL (UDR 2).
+   Fermate di Mentana escluse su richiesta — solo fermate nel comune di Monterotondo. */
+const linea30_andata = {
+  routeLabel: 'Via Roma (Sant\'Angelo Romano) <span class="arrow">→</span> Stazione di Monterotondo',
+  sub: 'Con passaggio nel comune di Mentana (fermate non mostrate)',
+  departures: {
+    lv:  ["07:15","09:25","12:35","15:10","18:00","20:00"],
+    sab: ["07:15","09:25","12:35","15:10","18:00","20:00"]
+  },
+  stops: [
+    { name:"Via Roma (Sant'Angelo Romano)", type:"terminal",
+      lv:["07:15","09:25","12:35","15:10","18:00","20:00"],
+      sab:["07:15","09:25","12:35","15:10","18:00","20:00"] },
+    { name:"Via Corsica", type:"stop",
+      lv:["07:49","09:59","13:09","15:44","18:34","20:34"],
+      sab:["07:49","09:59","13:09","15:44","18:34","20:34"] },
+    { name:"Via XX Settembre", type:"stop",
+      lv:["10:01","13:11","15:46","18:36","20:36"],
+      sab:["07:51","10:01","13:11","15:46","18:36","20:36"] },
+    { name:"Via Mazzini", type:"stop", lv:["07:50"], sab:[] },
+    { name:"Cimitero Vecchio", type:"stop", lv:["07:51"], sab:[] },
+    { name:"Via Isonzo", type:"stop", lv:["07:52"], sab:[] },
+    { name:"Via Pompili / Via Piave", type:"stop", lv:["07:53"], sab:[] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop", lv:["07:54"], sab:[] },
+    { name:"Piazza Pesciarelli", type:"stop", lv:[], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:["07:58"], sab:[] },
+    { name:"Via Kennedy", type:"stop", lv:["08:02"], sab:[] },
+    { name:"Via XV Aprile", type:"stop", lv:[], sab:[] },
+    { name:"Via Gramsci / Via Volturno", type:"key",
+      lv:["08:05","10:04","13:14","15:49","18:39","20:39"],
+      sab:["07:54","10:04","13:14","15:49","18:39","20:39"] },
+    { name:"Via Gramsci / Via Monti Sabini", type:"stop",
+      lv:["08:07","10:06","13:16","15:51","18:41","20:41"],
+      sab:["07:56","10:06","13:16","15:51","18:41","20:41"] },
+    { name:"Via Monti Sabatini / Via Grandi", type:"stop",
+      lv:["08:08","10:07","13:17","15:52","18:42","20:42"],
+      sab:["07:57","10:07","13:17","15:52","18:42","20:42"] },
+    { name:"Via Monti Sabatini", type:"stop",
+      lv:["08:09","10:08","13:18","15:53","18:43","20:43"],
+      sab:["07:58","10:08","13:18","15:53","18:43","20:43"] },
+    { name:"Largo Gran Sasso", type:"stop",
+      lv:["08:11","10:10","13:20","15:55","18:45","20:45"],
+      sab:["08:00","10:10","13:20","15:55","18:45","20:45"] },
+    { name:"Via Aeronautica / Via Vulcano", type:"key",
+      lv:["08:12","10:11","13:21","15:56","18:46","20:46"],
+      sab:["08:01","10:11","13:21","15:56","18:46","20:46"] },
+    { name:"Stazione di Monterotondo", type:"terminal",
+      lv:["08:16","10:15","13:25","16:00","18:50","20:50"],
+      sab:["08:05","10:15","13:25","16:00","18:50","20:50"] }
+  ]
+};
+
+const linea30_ritorno = {
+  routeLabel: 'Stazione di Monterotondo <span class="arrow">→</span> Via Roma (Sant\'Angelo Romano)',
+  sub: 'Con passaggio nel comune di Mentana (fermate non mostrate)',
+  departures: {
+    lv:  ["06:15","08:30","11:30","13:55","17:00","19:00"],
+    sab: ["06:15","08:30","11:30","13:55","17:00","19:00"]
+  },
+  stops: [
+    { name:"Stazione di Monterotondo", type:"terminal",
+      lv:["06:15","08:30","11:30","13:55","17:00","19:00"],
+      sab:["06:15","08:30","11:30","13:55","17:00","19:00"] },
+    { name:"Via Aeronautica / Via Vulcano", type:"key",
+      lv:["06:19","08:34","11:34","13:59","17:04","19:04"],
+      sab:["06:19","08:34","11:34","13:59","17:04","19:04"] },
+    { name:"Largo Gran Sasso", type:"stop",
+      lv:["06:20","08:35","11:35","14:00","17:05","19:05"],
+      sab:["06:20","08:35","11:35","14:00","17:05","19:05"] },
+    { name:"Via Monti Sabatini", type:"stop",
+      lv:["06:22","08:37","11:37","14:02","17:07","19:07"],
+      sab:["06:22","08:37","11:37","14:02","17:07","19:07"] },
+    { name:"Via Monti Sabatini / Via Grandi", type:"stop",
+      lv:["06:23","08:38","11:38","14:03","17:08","19:08"],
+      sab:["06:23","08:38","11:38","14:03","17:08","19:08"] },
+    { name:"Via Gramsci / Via Monti Sabini", type:"stop",
+      lv:["06:24","08:39","11:39","14:04","17:09","19:09"],
+      sab:["06:24","08:39","11:39","14:04","17:09","19:09"] },
+    { name:"Via Gramsci / Via Volturno", type:"key",
+      lv:["06:26","08:41","11:41","14:06","17:11","19:11"],
+      sab:["06:26","08:41","11:41","14:06","17:11","19:11"] },
+    { name:"Arco di San Rocco", type:"stop",
+      lv:["06:29","08:44","11:44","14:09","17:14","19:14"],
+      sab:["06:29","08:44","11:44","14:09","17:14","19:14"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["06:31","08:46","11:46","14:11","17:16","19:16"],
+      sab:["06:31","08:46","11:46","14:11","17:16","19:16"] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop",
+      lv:["06:32","08:47","11:47","14:12","17:17","19:17"],
+      sab:["06:32","08:47","11:47","14:12","17:17","19:17"] },
+    { name:"Viale Buozzi / Via Corsica", type:"stop", lv:["14:13"], sab:[] },
+    { name:"Via Corsica", type:"stop", lv:["14:14"], sab:[] },
+    { name:"Via Mazzini", type:"stop", lv:["14:15"], sab:[] },
+    { name:"Cimitero Vecchio", type:"stop", lv:["14:16"], sab:[] },
+    { name:"Via Isonzo", type:"stop", lv:["14:17"], sab:[] },
+    { name:"Via Pompili / Via Piave", type:"stop", lv:["14:18"], sab:[] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop", lv:[], sab:[] },
+    { name:"Piazza Pesciarelli", type:"stop", lv:[], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:["14:22"], sab:[] },
+    { name:"Via Kennedy", type:"stop", lv:["14:26"], sab:[] },
+    { name:"Via XX Settembre", type:"stop", lv:[], sab:[] },
+    { name:"Via Matteotti", type:"stop", lv:["14:29"], sab:[] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop", lv:["14:30"], sab:[] },
+    { name:"Viale Buozzi / Via Corsica", type:"stop", lv:[], sab:[] },
+    { name:"Via Roma (Sant'Angelo Romano)", type:"terminal", lv:[], sab:[] }
+  ]
+};
+
+/* ═══════════════════ LINEA 25 ═══════════════════ */
+/* Linea urbana, interamente nel comune di Monterotondo. Dati estratti automaticamente dal KML ASTRAL. */
+const linea25_andata = {
+  routeLabel: 'Piazza Pesciarelli <span class="arrow">→</span> Stazione di Monterotondo',
+  sub: 'Linea urbana, interamente all\'interno del comune di Monterotondo',
+  departures: {
+    lv:  ["06:45","07:30","08:10","08:50","09:50","11:00","12:15","13:15","14:40","15:00","16:05","18:15","19:55","21:50","23:35"],
+    sab: ["06:45","08:10","09:50","12:15","14:40","16:05","18:15","19:55","21:50","23:35"]
+  },
+  stops: [
+    { name:"Piazza Pesciarelli", type:"terminal",
+      lv:["06:45","07:30","08:10","08:50","09:50","11:00","12:15","13:15","14:40","15:00","16:05","18:15","19:55","21:50","23:35"],
+      sab:["06:45","08:10","09:50","12:15","14:40","16:05","18:15","19:55","21:50","23:35"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["06:02","06:47","07:32","08:12","09:12","10:12","11:12","12:07","13:37","14:22","15:22","17:07","19:07","20:42","22:27"],
+      sab:["06:02","07:32","09:12","11:12","13:37","15:22","17:07","19:07","20:42","22:27"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["06:03","06:48","07:33","08:13","09:13","10:13","11:13","12:08","13:38","14:23","15:23","17:08","19:08","20:43","22:28"],
+      sab:["06:03","07:33","09:13","11:13","13:38","15:23","17:08","19:08","20:43","22:28"] },
+    { name:"Via Di Vittorio", type:"stop",
+      lv:["06:04","06:49","07:34","08:14","09:14","10:14","11:14","12:09","13:39","14:24","15:24","17:09","19:09","20:44","22:29"],
+      sab:["06:04","07:34","09:14","11:14","13:39","15:24","17:09","19:09","20:44","22:29"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["06:05","06:50","07:35","08:15","09:15","10:15","11:15","12:10","13:40","14:25","15:25","17:10","19:10","20:45","22:30"],
+      sab:["06:05","07:35","09:15","11:15","13:40","15:25","17:10","19:10","20:45","22:30"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["06:06","06:51","07:36","08:16","09:16","10:16","11:16","12:11","13:41","14:26","15:26","17:11","19:11","20:46","22:31"],
+      sab:["06:06","07:36","09:16","11:16","13:41","15:26","17:11","19:11","20:46","22:31"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["06:07","06:52","07:37","08:17","09:17","10:17","11:17","12:12","13:42","14:27","15:27","17:12","19:12","20:47","22:32"],
+      sab:["06:07","07:37","09:17","11:17","13:42","15:27","17:12","19:12","20:47","22:32"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["06:08","06:53","07:38","08:18","09:18","10:18","11:18","12:13","13:43","14:28","15:28","17:13","19:13","20:48","22:33"],
+      sab:["06:08","07:38","09:18","11:18","13:43","15:28","17:13","19:13","20:48","22:33"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["06:10","06:55","07:40","08:20","09:20","10:20","11:20","12:15","13:45","14:30","15:30","17:15","19:15","20:50","22:35"],
+      sab:["06:10","07:40","09:20","11:20","13:45","15:30","17:15","19:15","20:50","22:35"] },
+    { name:"Via Di Vittorio", type:"stop",
+      lv:["06:11","06:56","07:41","08:21","09:21","10:21","11:21","12:16","13:46","14:31","15:31","17:16","19:16","20:51","22:36"],
+      sab:["06:11","07:41","09:21","11:21","13:46","15:31","17:16","19:16","20:51","22:36"] },
+    { name:"Via Ciceruacchio", type:"stop",
+      lv:["06:12","06:57","07:42","08:22","09:22","10:22","11:22","12:17","13:47","14:32","15:32","17:17","19:17","20:52","22:37"],
+      sab:["06:12","07:42","09:22","11:22","13:47","15:32","17:17","19:17","20:52","22:37"] },
+    { name:"Piazza Indipendenza", type:"key",
+      lv:["06:14","06:19","06:59","07:04","07:44","07:49","08:24","08:29","09:24","09:29","10:24","10:29","11:24","11:29","12:19","12:24","13:49","13:54","14:34","14:39","15:34","15:39","17:19","17:24","19:19","19:24","20:54","20:59","22:39","22:44"],
+      sab:["06:14","06:19","07:44","07:49","09:24","09:29","11:24","11:29","13:49","13:54","15:34","15:39","17:19","17:24","19:19","19:24","20:54","20:59","22:39","22:44"] },
+    { name:"Via XX Settembre", type:"stop",
+      lv:["06:21","07:06","07:51","08:31","09:31","10:31","11:31","12:26","13:56","14:41","15:41","17:26","19:26","21:01","22:46"],
+      sab:["06:21","07:51","09:31","11:31","13:56","15:41","17:26","19:26","21:01","22:46"] },
+    { name:"Viale XXV Aprile", type:"stop",
+      lv:["06:22","07:07","07:52","08:32","09:32","10:32","11:32","12:27","13:57","14:42","15:42","17:27","19:27","21:02","22:47"],
+      sab:["06:22","07:52","09:32","11:32","13:57","15:42","17:27","19:27","21:02","22:47"] },
+    { name:"Via Gramsci / Via Volturno", type:"key",
+      lv:["06:24","07:09","07:54","08:34","09:34","10:34","11:34","12:29","13:59","14:44","15:44","17:29","19:29","21:04","22:49"],
+      sab:["06:24","07:54","09:34","11:34","13:59","15:44","17:29","19:29","21:04","22:49"] },
+    { name:"Via Gramsci / Via Monti Sabini", type:"stop",
+      lv:["06:25","07:10","07:55","08:35","09:35","10:35","11:35","12:30","14:00","14:45","15:45","17:30","19:30","21:05","22:50"],
+      sab:["06:25","07:55","09:35","11:35","14:00","15:45","17:30","19:30","21:05","22:50"] },
+    { name:"Via Grandi", type:"stop",
+      lv:["06:27","07:12","07:57","08:37","09:37","10:37","11:37","12:32","14:02","14:47","15:47","17:32","19:32","21:07","22:52"],
+      sab:["06:27","07:57","09:37","11:37","14:02","15:47","17:32","19:32","21:07","22:52"] },
+    { name:"Via Turati / Via Terminillo", type:"stop",
+      lv:["06:28","07:13","07:58","08:38","09:38","10:38","11:38","12:33","14:03","14:48","15:48","17:33","19:33","21:08","22:53"],
+      sab:["06:28","07:58","09:38","11:38","14:03","15:48","17:33","19:33","21:08","22:53"] },
+    { name:"Via Turati / Via Nilde Iotti", type:"stop",
+      lv:["06:30","07:15","08:00","08:40","09:40","10:40","11:40","12:35","14:05","14:50","15:50","17:35","19:35","21:10","22:55"],
+      sab:["06:30","08:00","09:40","11:40","14:05","15:50","17:35","19:35","21:10","22:55"] },
+    { name:"Via dell'Aeronautica / Via Vulcano", type:"key",
+      lv:["06:31","07:16","08:01","08:41","09:41","10:41","11:41","12:36","14:06","14:51","15:51","17:36","19:36","21:11","22:56"],
+      sab:["06:31","08:01","09:41","11:41","14:06","15:51","17:36","19:36","21:11","22:56"] },
+    { name:"Via Monti Sabini / Via Guevara", type:"stop",
+      lv:["06:32","07:17","08:02","08:42","09:42","10:42","11:42","12:37","14:07","14:52","15:52","17:37","19:37","21:12","22:57"],
+      sab:["06:32","08:02","09:42","11:42","14:07","15:52","17:37","19:37","21:12","22:57"] },
+    { name:"Via Monte Circeo / Via Salaria", type:"stop",
+      lv:["06:33","07:18","08:03","08:43","09:43","10:43","11:43","12:38","14:08","14:53","15:53","17:38","19:38","21:13","22:58"],
+      sab:["06:33","08:03","09:43","11:43","14:08","15:53","17:38","19:38","21:13","22:58"] },
+    { name:"Via Salaria (Piedicosta)", type:"stop",
+      lv:["06:34","07:19","08:04","08:44","09:44","10:44","11:44","12:39","14:09","14:54","15:54","17:39","19:39","21:14","22:59"],
+      sab:["06:34","08:04","09:44","11:44","14:09","15:54","17:39","19:39","21:14","22:59"] },
+    { name:"Via Salaria / Via Papa Lando I", type:"stop",
+      lv:["06:35","07:20","08:05","08:45","09:45","10:45","11:45","12:40","14:10","14:55","15:55","17:40","19:40","21:15","23:00"],
+      sab:["06:35","08:05","09:45","11:45","14:10","15:55","17:40","19:40","21:15","23:00"] },
+    { name:"Via Salaria (Zona Industriale)", type:"stop",
+      lv:["06:36","07:21","08:06","08:46","09:46","10:46","11:46","12:41","14:11","14:56","15:56","17:41","19:41","21:16","23:01"],
+      sab:["06:36","08:06","09:46","11:46","14:11","15:56","17:41","19:41","21:16","23:01"] },
+    { name:"Via Aldo Moro", type:"stop",
+      lv:["06:37","07:22","08:07","08:47","09:47","10:47","11:47","12:42","14:12","14:57","15:57","17:42","19:42","21:17","23:02"],
+      sab:["06:37","08:07","09:47","11:47","14:12","15:57","17:42","19:42","21:17","23:02"] },
+    { name:"Stazione di Monterotondo", type:"terminal",
+      lv:["06:38","07:23","08:08","08:48","09:48","10:48","11:48","12:43","14:13","14:58","15:58","17:43","19:43","21:18","23:03"],
+      sab:["06:38","08:08","09:48","11:48","14:13","15:58","17:43","19:43","21:18","23:03"] }
+  ]
+};
+
+const linea25_ritorno = {
+  routeLabel: 'Stazione di Monterotondo <span class="arrow">→</span> Piazza Pesciarelli',
+  sub: 'Linea urbana, interamente all\'interno del comune di Monterotondo',
+  departures: {
+    lv:  ["06:00","06:45","07:30","08:10","09:10","10:10","11:10","12:05","13:35","14:20","15:20","17:05","19:05","20:40","22:25"],
+    sab: ["06:00","07:30","09:10","11:10","13:35","15:20","17:05","19:05","20:40","22:25"]
+  },
+  stops: [
+    { name:"Stazione di Monterotondo", type:"terminal",
+      lv:["06:00","06:45","07:30","08:10","09:10","10:10","11:10","12:05","13:35","14:20","15:20","17:05","19:05","20:40","22:25"],
+      sab:["06:00","07:30","09:10","11:10","13:35","15:20","17:05","19:05","20:40","22:25"] },
+    { name:"Via Salaria (Zona Industriale)", type:"stop",
+      lv:["06:47","07:32","08:12","08:52","09:52","11:02","12:17","13:17","14:42","15:02","16:07","18:17","19:57","21:52","23:37"],
+      sab:["06:47","08:12","09:52","12:17","14:42","16:07","18:17","19:57","21:52","23:37"] },
+    { name:"Via Salaria / Via Papa Lando I", type:"stop",
+      lv:["06:35","07:20","08:05","08:45","09:45","10:45","11:45","12:40","14:10","14:55","15:55","17:40","19:40","21:15","23:00"],
+      sab:["06:35","08:05","09:45","11:45","14:10","15:55","17:40","19:40","21:15","23:00"] },
+    { name:"Via Salaria (Piedicosta)", type:"stop",
+      lv:["06:51","07:36","08:16","08:56","09:56","11:06","12:21","13:21","14:46","15:06","16:11","18:21","20:01","21:56","23:41"],
+      sab:["06:51","08:16","09:56","12:21","14:46","16:11","18:21","20:01","21:56","23:41"] },
+    { name:"Via Monte Circeo / Via Salaria", type:"stop",
+      lv:["06:52","07:37","08:17","08:57","09:57","11:07","12:22","13:22","14:47","15:07","16:12","18:22","20:02","21:57","23:42"],
+      sab:["06:52","08:17","09:57","12:22","14:47","16:12","18:22","20:02","21:57","23:42"] },
+    { name:"Via Monti Sabini / Via Guevara", type:"stop",
+      lv:["06:53","07:38","08:18","08:58","09:58","11:08","12:23","13:23","14:48","15:08","16:13","18:23","20:03","21:58","23:43"],
+      sab:["06:53","08:18","09:58","12:23","14:48","16:13","18:23","20:03","21:58","23:43"] },
+    { name:"Via dell'Aeronautica / Via Vulcano", type:"key",
+      lv:["06:54","07:39","08:19","08:59","09:59","11:09","12:24","13:24","14:49","15:09","16:14","18:24","20:04","21:59","23:44"],
+      sab:["06:54","08:19","09:59","12:24","14:49","16:14","18:24","20:04","21:59","23:44"] },
+    { name:"Via Turati / Via Nilde Iotti", type:"stop",
+      lv:["06:55","07:40","08:20","09:00","10:00","11:10","12:25","13:25","14:50","15:10","16:15","18:25","20:05","22:00","23:45"],
+      sab:["06:55","08:20","10:00","11:10","12:25","14:50","16:15","18:25","20:05","22:00","23:45"] },
+    { name:"Via Turati / Via Terminillo", type:"stop",
+      lv:["06:57","07:42","08:22","09:02","10:02","11:12","12:27","13:27","14:52","15:12","16:17","18:27","20:07","22:02","23:47"],
+      sab:["06:57","08:22","10:02","12:27","14:52","16:17","18:27","20:07","22:02","23:47"] },
+    { name:"Via Grandi", type:"stop",
+      lv:["06:59","07:44","08:24","09:04","10:04","11:14","12:29","13:29","14:54","15:14","16:19","18:29","20:09","22:04","23:49"],
+      sab:["06:59","08:24","10:04","12:29","14:54","16:19","18:29","20:09","22:04","23:49"] },
+    { name:"Via Gramsci / Via Monti Sabini", type:"stop",
+      lv:["07:01","07:46","08:26","09:06","10:06","11:16","12:31","13:31","14:56","15:16","16:21","18:31","20:11","22:06","23:51"],
+      sab:["07:01","08:26","10:06","12:31","14:56","16:21","18:31","20:11","22:06","23:51"] },
+    { name:"Via Gramsci / Via Volturno", type:"key",
+      lv:["07:03","07:48","08:28","09:08","10:08","11:18","12:33","13:33","14:58","15:18","16:23","18:33","20:13","22:08","23:53"],
+      sab:["07:03","08:28","10:08","12:33","14:58","16:23","18:33","20:13","22:08","23:53"] },
+    { name:"Arco di San Rocco", type:"stop",
+      lv:["07:04","07:49","08:29","09:09","10:09","11:19","12:34","13:34","14:59","15:19","16:24","18:34","20:14","22:09","23:54"],
+      sab:["07:04","08:29","10:09","12:34","14:59","16:24","18:34","20:14","22:09","23:54"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["07:05","07:50","08:30","09:10","10:10","11:20","12:35","13:35","15:00","15:20","16:25","18:35","20:15","22:10","23:55"],
+      sab:["07:05","08:30","10:10","12:35","15:00","16:25","18:35","20:15","22:10","23:55"] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop",
+      lv:["07:06","07:51","08:31","09:11","10:11","11:21","12:36","13:36","15:01","15:21","16:26","18:36","20:16","22:11","23:56"],
+      sab:["07:06","08:31","10:11","12:36","15:01","16:26","18:36","20:16","22:11","23:56"] },
+    { name:"Viale Buozzi / Via Corsica", type:"stop",
+      lv:["07:07","07:52","08:32","09:12","10:12","11:22","12:37","13:37","15:02","15:22","16:27","18:37","20:17","22:12","23:57"],
+      sab:["07:07","08:32","10:12","12:37","15:02","16:27","18:37","20:17","22:12","23:57"] },
+    { name:"Via Corsica", type:"stop",
+      lv:["07:08","07:53","08:33","09:13","10:13","11:23","12:38","13:38","15:03","15:23","16:28","18:38","20:18","22:13","23:58"],
+      sab:["07:08","08:33","10:13","12:38","15:03","16:28","18:38","20:18","22:13","23:58"] },
+    { name:"Via Mazzini", type:"stop",
+      lv:["07:09","07:54","08:34","09:14","10:14","11:24","12:39","13:39","15:04","15:24","16:29","18:39","20:19","22:14","23:59"],
+      sab:["07:09","08:34","10:14","12:39","15:04","16:29","18:39","20:19","22:14","23:59"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["07:10","07:55","08:35","09:15","10:15","11:25","12:40","13:40","15:05","15:25","16:30","18:40","20:20","22:15","24:00"],
+      sab:["07:10","08:35","10:15","12:40","15:05","16:30","18:40","20:20","22:15","24:00"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["07:11","07:56","08:36","09:16","10:16","11:26","12:41","13:41","15:06","15:26","16:31","18:41","20:21","22:16","24:01"],
+      sab:["07:11","08:36","10:16","12:41","15:06","16:31","18:41","20:21","22:16","24:01"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["07:12","07:57","08:37","09:17","10:17","11:27","12:42","13:42","15:07","15:27","16:32","18:42","20:22","22:17","24:02"],
+      sab:["07:12","08:37","10:17","12:42","15:07","16:32","18:42","20:22","22:17","24:02"] },
+    { name:"Piazza Pesciarelli", type:"terminal",
+      lv:["06:45","07:30","08:10","08:50","09:50","11:00","12:15","13:15","14:40","15:00","16:05","18:15","19:55","21:50","23:35"],
+      sab:["06:45","08:10","09:50","12:15","14:40","16:05","18:15","19:55","21:50","23:35"] }
+  ]
+};
+
+/* ═══════════════════ LINEA 10 ═══════════════════ */
+/* Capena — Castelnuovo di Porto — Monterotondo. Dati estratti automaticamente dal KML ASTRAL.
+   Su richiesta: nella card/metromap mostrate solo le fermate nel comune di Monterotondo;
+   i due capolinea restano etichettati per identificare correttamente la linea. */
+const linea10_andata = {
+  routeLabel: 'Via del Mattatoio (Capena) <span class="arrow">→</span> Piazza Pesciarelli',
+  sub: 'Linea proveniente da Capena e Castelnuovo di Porto (fermate non mostrate)',
+  departures: {
+    lv:  ["06:20","07:05","08:05","09:30","11:10","11:40","12:55","13:50","14:40","16:00","16:20","17:55","19:00","20:00"],
+    sab: ["07:00","09:20","11:25","14:00","16:10","18:20","20:00"]
+  },
+  stops: [
+    { name:"Via del Mattatoio (Capena)", type:"terminal",
+      lv:["06:20","07:05","08:05","09:30","11:10","11:40","12:55","13:50","14:40","16:00","16:20","17:55","19:00","20:00"],
+      sab:["07:00","09:20","11:25","14:00","16:10","18:20","20:00"] },
+    { name:"Via da Vinci / Via Meucci", type:"stop",
+      lv:["06:45","07:30","08:30","09:55","11:35","12:05","13:20","14:15","15:05","16:25","16:45","18:20","19:25","20:25"],
+      sab:["07:25","09:45","11:50","14:25","16:35","18:45","20:25"] },
+    { name:"Via Salaria (Zona Industriale)", type:"stop",
+      lv:["06:48","07:33","08:33","09:58","11:38","12:08","13:23","14:18","15:08","16:28","16:48","18:23","19:28","20:28"],
+      sab:["07:28","09:48","11:53","14:28","16:38","18:48","20:28"] },
+    { name:"Stazione di Monterotondo", type:"key",
+      lv:["06:50","07:35","08:35","10:00","11:40","12:10","13:25","14:20","15:10","16:30","16:50","18:25","19:30","20:30"],
+      sab:["07:30","09:50","11:55","14:30","16:40","18:50","20:30"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["06:54","07:39","08:39","10:04","11:44","12:14","13:29","14:24","15:14","16:34","16:54","18:29","19:34","20:34"],
+      sab:["07:34","09:54","11:59","14:34","16:44","18:54","20:34"] },
+    { name:"Piazza Santa Maria (Istituto A. Frammartino)", type:"stop",
+      lv:["06:56","07:41","08:41","10:06","11:46","12:16","13:31","14:26","15:16","16:36","16:56","18:31","19:36","20:36"],
+      sab:["07:36","09:56","12:01","14:36","16:46","18:56","20:36"] },
+    { name:"Via Kennedy", type:"stop", lv:["07:43"], sab:[] },
+    { name:"Viale XXV Aprile", type:"stop", lv:["07:44"], sab:[] },
+    { name:"Via Matteotti", type:"stop", lv:["07:46"], sab:[] },
+    { name:"Via Mazzini", type:"stop", lv:["07:48"], sab:[] },
+    { name:"Cimitero Vecchio", type:"stop", lv:["07:49"], sab:[] },
+    { name:"Via Isonzo", type:"stop", lv:["07:50"], sab:[] },
+    { name:"Via Pompili / Via Piave", type:"stop", lv:["07:51"], sab:[] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop", lv:["07:52"], sab:[] },
+    { name:"Via dello Stadio", type:"stop",
+      lv:["06:57","08:42","10:07","11:47","12:17","13:32","14:27","15:17","16:37","16:57","18:32","19:37","20:37"],
+      sab:["07:37","09:57","12:02","14:37","16:47","18:57","20:37"] },
+    { name:"Via dello Stadio / Via Sant'Anna di Stanselma", type:"stop",
+      lv:["06:58","08:43","10:08","11:48","12:18","13:33","14:28","15:18","16:38","16:58","18:33","19:38","20:38"],
+      sab:["07:38","09:58","12:03","14:38","16:48","18:58","20:38"] },
+    { name:"Via dello Stadio (Stadio del Nuoto)", type:"stop",
+      lv:["06:59","08:44","10:09","11:49","12:19","13:34","14:29","15:19","16:39","16:59","18:34","19:39","20:39"],
+      sab:["07:39","09:59","12:04","14:39","16:49","18:59","20:39"] },
+    { name:"Piazza Pesciarelli", type:"terminal",
+      lv:["07:00","07:54","08:45","10:10","11:50","12:20","13:35","14:30","15:20","16:40","17:00","18:35","19:40","20:40"],
+      sab:["07:40","10:00","12:05","14:40","16:50","19:00","20:40"] }
+  ]
+};
+
+const linea10_ritorno = {
+  routeLabel: 'Piazza Pesciarelli <span class="arrow">→</span> Via del Mattatoio (Capena)',
+  sub: 'Linea diretta a Capena e Castelnuovo di Porto (fermate non mostrate)',
+  departures: {
+    lv:  ["06:05","07:10","08:10","09:20","10:41","12:00","12:51","13:40","14:35","15:25","16:50","18:00","19:06","20:00","21:00"],
+    sab: ["06:05","08:00","10:35","12:10","14:45","17:00","19:05"]
+  },
+  stops: [
+    { name:"Piazza Pesciarelli", type:"terminal",
+      lv:["06:05","07:10","08:10","09:20","10:41","12:00","12:51","13:40","14:35","15:25","16:50","18:00","19:06","20:00","21:00"],
+      sab:["06:05","08:00","10:35","12:10","14:45","17:00","19:05"] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop",
+      lv:["06:06","07:11","08:11","09:21","10:42","12:01","12:52","13:41","14:36","15:26","16:51","18:01","19:07","20:01","21:01"],
+      sab:["06:06","08:01","10:36","12:11","14:46","17:01","19:06"] },
+    { name:"Via dell'Unione / Via Adige", type:"stop",
+      lv:["06:07","07:12","08:12","09:22","10:43","12:02","12:53","13:42","14:37","15:27","16:52","18:02","19:08","20:02","21:02"],
+      sab:["06:07","08:02","10:37","12:12","14:47","17:02","19:07"] },
+    { name:"Via Di Vittorio", type:"stop", lv:["12:54","13:43","14:38","15:28"], sab:[] },
+    { name:"Cimitero Vecchio", type:"stop", lv:["12:55","13:44","14:39","15:29"], sab:[] },
+    { name:"Via Isonzo", type:"stop", lv:["12:56","13:45","14:40","15:30"], sab:[] },
+    { name:"Via Pompili / Via Piave", type:"stop", lv:["12:57","13:46","14:41","15:31"], sab:[] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop", lv:["12:58","13:47","14:42","15:32"], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:["13:00","13:49","14:44","15:34"], sab:[] },
+    { name:"Via Kennedy", type:"stop",
+      lv:["06:09","07:14","08:14","09:24","10:45","12:04","13:02","13:51","14:46","15:36","16:54","18:04","19:10","20:04","21:04"],
+      sab:["06:09","08:04","10:39","12:14","14:49","17:04","19:09"] },
+    { name:"Piazza Santa Maria (Istituto A. Frammartino)", type:"stop",
+      lv:["06:10","07:15","08:15","09:25","10:46","12:05","13:03","13:52","14:47","15:37","16:55","18:05","19:11","20:05","21:05"],
+      sab:["06:10","08:05","10:40","12:15","14:50","17:05","19:10"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["06:12","07:17","08:17","09:27","10:48","12:07","13:05","13:54","14:49","15:39","16:57","18:07","19:13","20:07","21:07"],
+      sab:["06:12","08:07","10:42","12:17","14:52","17:07","19:12"] },
+    { name:"Stazione di Monterotondo", type:"key",
+      lv:["06:16","07:21","08:21","09:31","10:52","12:11","13:09","13:58","14:53","15:43","17:01","18:11","19:17","20:11","21:11"],
+      sab:["06:16","08:11","10:46","12:21","14:56","17:11","19:16"] },
+    { name:"Via da Vinci / Via Meucci", type:"stop",
+      lv:["06:19","07:24","08:24","09:34","10:55","12:14","13:12","14:01","14:56","15:46","17:04","18:14","19:20","20:14","21:14"],
+      sab:["06:19","08:14","10:49","12:24","14:59","17:14","19:19"] },
+    { name:"Via del Mattatoio (Capena)", type:"terminal",
+      lv:["06:51","07:56","08:56","10:06","11:27","12:46","13:44","14:33","15:28","16:18","17:36","18:46","19:52","20:46","21:46"],
+      sab:["06:51","08:46","11:21","12:56","15:31","17:46","19:51"] }
+  ]
+};
+
+/* ═══════════════════ LINEA 18 ═══════════════════ */
+/* Via Tacito (Guidonia) — Fonte Nuova — Mentana — Monterotondo. Dati estratti automaticamente dal KML ASTRAL.
+   Su richiesta: mostrate solo le fermate nel comune di Monterotondo, capolinea esclusi dal filtro. */
+const linea18_andata = {
+  routeLabel: 'Via Tacito (Guidonia) <span class="arrow">→</span> Stazione di Monterotondo',
+  sub: 'Linea proveniente da Fonte Nuova e Mentana (fermate non mostrate)',
+  departures: {
+    lv:  ["05:00","06:25","07:10","08:40","09:50","11:30","12:35","13:35","15:10","16:40","18:00","19:10","20:05"],
+    sab: ["05:00","07:10","09:50","12:25","15:10","18:00","20:05"]
+  },
+  stops: [
+    { name:"Via Tacito (Guidonia)", type:"terminal",
+      lv:["05:00","06:25","07:10","08:40","09:50","11:30","12:35","13:35","15:10","16:40","18:00","19:10","20:05"],
+      sab:["05:00","07:10","09:50","12:25","15:10","18:00","20:05"] },
+    { name:"Via Corsica", type:"stop",
+      lv:["05:32","06:57","07:41","09:12","10:22","12:02","13:07","14:07","15:42","17:12","18:32","19:42","20:37"],
+      sab:["05:32","07:42","10:22","12:57","15:42","18:32","20:37"] },
+    { name:"Via Mazzini", type:"stop", lv:["07:42"], sab:[] },
+    { name:"Cimitero Vecchio", type:"stop", lv:["07:43"], sab:[] },
+    { name:"Via Isonzo", type:"stop", lv:["07:44"], sab:[] },
+    { name:"Via Pompili / Via Piave", type:"stop", lv:["07:45"], sab:[] },
+    { name:"Piazza Pesciarelli", type:"stop", lv:[], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:["07:49"], sab:[] },
+    { name:"Via Di Vittorio", type:"stop", lv:["07:50"], sab:[] },
+    { name:"Via Ciceruacchio", type:"stop", lv:["07:51"], sab:[] },
+    { name:"Piazza Indipendenza", type:"key", lv:["07:53"], sab:[] },
+    { name:"Via XX Settembre", type:"stop",
+      lv:["05:34","06:59","07:55","09:14","10:24","12:04","13:09","14:09","15:44","17:14","18:34","19:44","20:39"],
+      sab:["05:34","07:44","10:24","12:59","15:44","18:34","20:39"] },
+    { name:"Piazza Santa Maria (Istituto A. Frammartino)", type:"stop",
+      lv:["05:35","07:00","07:56","09:15","10:25","12:05","13:10","14:10","15:45","17:15","18:35","19:45","20:40"],
+      sab:["05:35","07:45","10:25","13:00","15:45","18:35","20:40"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["05:37","07:02","07:58","09:17","10:27","12:07","13:12","14:12","15:47","17:17","18:37","19:47","20:42"],
+      sab:["05:37","07:47","10:27","13:02","15:47","18:37","20:42"] },
+    { name:"San Martino", type:"stop",
+      lv:["05:38","07:03","07:59","09:18","10:28","12:08","13:13","14:13","15:48","17:18","18:38","19:48","20:43"],
+      sab:["05:38","07:48","10:28","13:03","15:48","18:38","20:43"] },
+    { name:"Chiesa San Martino", type:"stop",
+      lv:["05:39","07:04","08:00","09:19","10:29","12:09","13:14","14:14","15:49","17:19","18:39","19:49","20:44"],
+      sab:["05:39","07:49","10:29","13:04","15:49","18:39","20:44"] },
+    { name:"Via San Martino, 200", type:"stop",
+      lv:["05:40","07:05","08:01","09:20","10:30","12:10","13:15","14:15","15:50","17:20","18:40","19:50","20:45"],
+      sab:["05:40","07:50","10:30","13:05","15:50","18:40","20:45"] },
+    { name:"Via Salaria (Ponte del Grillo)", type:"stop",
+      lv:["05:43","07:08","08:04","09:23","10:33","12:13","13:18","14:18","15:53","17:23","18:43","19:53","20:48"],
+      sab:["05:43","07:53","10:33","13:08","15:53","18:43","20:48"] },
+    { name:"Via Salaria / Via Torricelli", type:"stop",
+      lv:["05:44","07:09","08:05","09:24","10:34","12:14","13:19","14:19","15:54","17:24","18:44","19:54","20:49"],
+      sab:["05:44","07:54","10:34","13:09","15:54","18:44","20:49"] },
+    { name:"Via San Martino / Sant'Anzino", type:"stop",
+      lv:["05:41","07:06","08:02","09:21","10:31","12:11","13:16","14:16","15:51","17:21","18:41","19:51","20:46"],
+      sab:["05:41","07:51","10:31","13:06","15:51","18:41","20:46"] },
+    { name:"Stazione di Monterotondo", type:"terminal",
+      lv:["05:47","07:12","08:08","09:27","10:37","12:17","13:22","14:22","15:57","17:27","18:47","19:57","20:52"],
+      sab:["05:47","07:57","10:37","13:12","15:57","18:47","20:52"] }
+  ]
+};
+
+const linea18_ritorno = {
+  routeLabel: 'Stazione di Monterotondo <span class="arrow">→</span> Via Tacito (Guidonia)',
+  sub: 'Linea diretta a Mentana e Fonte Nuova (fermate non mostrate)',
+  departures: {
+    lv:  ["05:05","06:10","07:25","08:20","10:05","11:20","12:30","13:55","14:55","16:35","18:05","19:05","20:35"],
+    sab: ["06:10","08:20","11:20","13:55","16:35","19:05","21:00"]
+  },
+  stops: [
+    { name:"Stazione di Monterotondo", type:"terminal",
+      lv:["05:05","06:10","07:25","08:20","10:05","11:20","12:30","13:55","14:55","16:35","18:05","19:05","20:35"],
+      sab:["06:10","08:20","11:20","13:55","16:35","19:05","21:00"] },
+    { name:"Via Salaria / Via Torricelli", type:"stop",
+      lv:["05:08","06:13","07:28","08:23","10:08","11:23","12:33","13:58","14:58","16:38","18:08","19:08","20:38"],
+      sab:["06:13","08:23","11:23","13:58","16:38","19:08","21:03"] },
+    { name:"Via Salaria (Ponte del Grillo)", type:"stop",
+      lv:["05:09","06:14","07:29","08:24","10:09","11:24","12:34","13:59","14:59","16:39","18:09","19:09","20:39"],
+      sab:["06:14","08:24","11:24","13:59","16:39","19:09","21:04"] },
+    { name:"Via San Martino / Sant'Anzino", type:"stop",
+      lv:["05:11","06:16","07:31","08:26","10:11","11:26","12:36","14:01","15:01","16:41","18:11","19:11","20:41"],
+      sab:["06:16","08:26","11:26","14:01","16:41","19:11","21:06"] },
+    { name:"Via San Martino, 200", type:"stop",
+      lv:["05:12","06:17","07:32","08:27","10:12","11:27","12:37","14:02","15:02","16:42","18:12","19:12","20:42"],
+      sab:["06:17","08:27","11:27","14:02","16:42","19:12","21:07"] },
+    { name:"Chiesa San Martino", type:"stop",
+      lv:["05:14","06:19","07:34","08:29","10:14","11:29","12:39","14:04","15:04","16:44","18:14","19:14","20:44"],
+      sab:["06:19","08:29","11:29","14:04","16:44","19:14","21:09"] },
+    { name:"San Martino", type:"stop",
+      lv:["05:16","06:21","07:36","08:31","10:16","11:31","12:41","14:06","15:06","16:46","18:16","19:16","20:46"],
+      sab:["06:21","08:31","11:31","14:06","16:46","19:16","21:11"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["05:17","06:22","07:37","08:32","10:17","11:32","12:42","14:07","15:07","16:47","18:17","19:17","20:47"],
+      sab:["06:22","08:32","11:32","14:07","16:47","19:17","21:12"] },
+    { name:"Piazza Santa Maria", type:"stop",
+      lv:["05:19","06:24","07:39","08:34","10:19","11:34","12:44","14:09","15:09","16:49","18:19","19:19","20:49"],
+      sab:["06:24","08:34","11:34","14:09","16:49","19:19","21:14"] },
+    { name:"Via dello Stadio", type:"stop", lv:["07:40","14:10"], sab:[] },
+    { name:"Via dello Stadio / Via Sant'Anna di Stazzema", type:"stop", lv:[], sab:[] },
+    { name:"Via della Fonte (Stadio del Nuoto)", type:"stop", lv:["07:42","14:12"], sab:[] },
+    { name:"Piazza Pesciarelli", type:"stop", lv:[], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:["07:46","14:16"], sab:[] },
+    { name:"Via Di Vittorio", type:"stop", lv:["07:47","14:17"], sab:[] },
+    { name:"Cimitero Vecchio", type:"stop", lv:["07:48","14:18"], sab:[] },
+    { name:"Via Isonzo", type:"stop", lv:["07:49","14:19"], sab:[] },
+    { name:"Via Pompili / Via Piave", type:"stop", lv:["07:50","14:20"], sab:[] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop", lv:["07:51","14:21"], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:["07:53","14:23"], sab:[] },
+    { name:"Via Di Vittorio", type:"stop", lv:["07:54","14:24"], sab:[] },
+    { name:"Via Ciceruacchio", type:"stop", lv:["07:55","14:25"], sab:[] },
+    { name:"Piazza Indipendenza", type:"key", lv:["07:57","14:27"], sab:[] },
+    { name:"Viale Kennedy", type:"stop",
+      lv:["05:21","06:26","08:36","10:21","11:36","12:46","15:11","16:51","18:21","19:21","20:51"],
+      sab:["06:26","08:36","11:36","14:11","16:51","19:21","21:16"] },
+    { name:"Viale XXV Aprile", type:"stop",
+      lv:["05:23","06:28","08:38","10:23","11:38","12:48","15:13","16:53","18:23","19:23","20:53"],
+      sab:["06:28","08:38","11:38","14:13","16:53","19:23","21:18"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["05:25","06:30","08:40","10:25","11:40","12:50","15:15","16:55","18:25","19:25","20:55"],
+      sab:["06:30","08:40","11:40","14:15","16:55","19:25","21:20"] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop",
+      lv:["05:27","06:32","07:59","08:42","10:27","11:42","12:52","14:29","15:17","16:57","18:27","19:27","20:57"],
+      sab:["06:32","08:42","11:42","14:17","16:57","19:27","21:22"] },
+    { name:"Viale Buozzi / Via Corsica", type:"stop",
+      lv:["05:29","06:34","08:01","08:44","10:29","11:44","12:54","14:31","15:19","16:59","18:29","19:29","20:59"],
+      sab:["06:34","08:44","11:44","14:19","16:59","19:29","21:24"] },
+    { name:"Via Tacito (Guidonia)", type:"terminal",
+      lv:["05:58","07:03","08:30","09:13","10:58","12:13","13:23","15:00","15:48","17:28","18:58","19:58","21:28"],
+      sab:["07:03","09:13","12:13","14:48","17:28","19:58","21:53"] }
+  ]
+};
+
+/* ═══════════════════ LINEA 19 ═══════════════════ */
+/* Via Valle dei Corsi (Fonte Nuova) — Mentana — Monterotondo. Dati estratti automaticamente dal KML ASTRAL.
+   Su richiesta: mostrate solo le fermate nel comune di Monterotondo, capolinea esclusi dal filtro. */
+const linea19_andata = {
+  routeLabel: 'Via Valle dei Corsi (Fonte Nuova) <span class="arrow">→</span> Stazione di Monterotondo',
+  sub: 'Linea proveniente da Fonte Nuova e Mentana (fermate non mostrate)',
+  departures: {
+    lv:  ["05:05","06:20","07:15","08:40","09:55","11:20","12:45","13:40","15:15","16:00","17:10","18:20","19:55","21:30"],
+    sab: ["05:05","07:15","09:55","12:45","15:15","17:10","19:55"]
+  },
+  stops: [
+    { name:"Via Valle dei Corsi (Fonte Nuova)", type:"terminal",
+      lv:["05:05","06:20","07:15","08:40","09:55","11:20","12:45","13:40","15:15","16:00","17:10","18:20","19:55","21:30"],
+      sab:["05:05","07:15","09:55","12:45","15:15","17:10","19:55"] },
+    { name:"Via Corsica", type:"stop",
+      lv:["05:29","06:44","07:39","09:04","10:19","11:44","13:09","14:04","15:39","16:24","17:34","18:44","20:19","21:54"],
+      sab:["05:29","07:39","10:19","13:09","15:39","17:34","20:19"] },
+    { name:"Piazza Indipendenza", type:"key",
+      lv:["05:30","06:45","09:05","10:20","11:45","13:10","15:40","16:25","17:35","18:45","20:20","21:55"],
+      sab:["05:30","07:40","10:20","13:10","15:40","17:35","20:20"] },
+    { name:"Via XX Settembre", type:"stop",
+      lv:["05:32","06:47","09:07","10:22","11:47","13:12","15:42","16:27","17:37","18:47","20:22","21:57"],
+      sab:["05:32","07:42","10:22","13:12","15:42","17:37","20:22"] },
+    { name:"Via Mazzini", type:"stop", lv:["07:40","14:05"], sab:[] },
+    { name:"Cimitero Vecchio", type:"stop", lv:["07:41","14:06"], sab:[] },
+    { name:"Via Isonzo", type:"stop", lv:["07:42","14:07"], sab:[] },
+    { name:"Via Dino Pompili / Via Piave", type:"stop", lv:["07:43","14:08"], sab:[] },
+    { name:"Piazza Pesciarelli", type:"stop", lv:[], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:[], sab:[] },
+    { name:"Via Kennedy", type:"stop", lv:["07:51","14:16"], sab:[] },
+    { name:"Piazza Santa Maria (Istituto Superiore A. Frammartino)", type:"stop",
+      lv:["05:34","06:49","07:52","09:09","10:24","11:49","13:14","14:17","15:44","16:29","17:39","18:49","20:24","21:59"],
+      sab:["05:34","07:44","10:24","13:14","15:44","17:39","20:24"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["05:35","06:50","07:53","09:10","10:25","11:50","13:15","14:18","15:45","16:30","17:40","18:50","20:25","22:00"],
+      sab:["05:35","07:45","10:25","13:15","15:45","17:40","20:25"] },
+    { name:"San Martino", type:"stop",
+      lv:["05:37","06:52","07:55","09:12","10:27","11:52","13:17","14:20","15:47","16:32","17:42","18:52","20:27","22:02"],
+      sab:["05:37","07:47","10:27","13:17","15:47","17:42","20:27"] },
+    { name:"Chiesa San Martino", type:"stop",
+      lv:["05:38","06:53","07:56","09:13","10:28","11:53","13:18","14:21","15:48","16:33","17:43","18:53","20:28","22:03"],
+      sab:["05:38","07:48","10:28","13:18","15:48","17:43","20:28"] },
+    { name:"Via San Martino, 200", type:"stop",
+      lv:["05:39","06:54","07:57","09:14","10:29","11:54","13:19","14:22","15:49","16:34","17:44","18:54","20:29","22:04"],
+      sab:["05:39","07:49","10:29","13:19","15:49","17:44","20:29"] },
+    { name:"Via San Martino / Sant'Anzino", type:"stop",
+      lv:["05:40","06:55","07:58","09:15","10:30","11:55","13:20","14:23","15:50","16:35","17:45","18:55","20:30","22:05"],
+      sab:["05:40","07:50","10:30","13:20","15:50","17:45","20:30"] },
+    { name:"Via Salaria (Ponte del Grillo)", type:"stop",
+      lv:["05:42","06:57","08:00","09:17","10:32","11:57","13:22","14:25","15:52","16:37","17:47","18:57","20:32","22:07"],
+      sab:["05:42","07:52","10:32","13:22","15:52","17:47","20:32"] },
+    { name:"Via Salaria / Via Torricelli", type:"stop",
+      lv:["05:43","06:58","08:01","09:18","10:33","11:58","13:23","14:26","15:53","16:38","17:48","18:58","20:33","22:08"],
+      sab:["05:43","07:53","10:33","13:23","15:53","17:48","20:33"] },
+    { name:"Stazione di Monterotondo", type:"terminal",
+      lv:["05:46","07:01","08:04","09:21","10:36","12:01","13:26","14:29","15:56","16:41","17:51","19:01","20:36","22:11"],
+      sab:["05:46","07:56","10:36","13:26","15:56","17:51","20:36"] }
+  ]
+};
+
+const linea19_ritorno = {
+  routeLabel: 'Stazione di Monterotondo <span class="arrow">→</span> Via Valle dei Corsi (Fonte Nuova)',
+  sub: 'Linea diretta a Mentana e Fonte Nuova (fermate non mostrate)',
+  departures: {
+    lv:  ["05:15","06:10","07:25","08:20","09:55","11:20","12:35","13:50","14:50","16:05","17:10","18:55","20:05","21:20","22:35"],
+    sab: ["06:10","08:20","11:20","14:10","16:05","18:55","21:20"]
+  },
+  stops: [
+    { name:"Stazione di Monterotondo", type:"terminal",
+      lv:["05:15","06:10","07:25","08:20","09:55","11:20","12:35","13:50","14:50","16:05","17:10","18:55","20:05","21:20","22:35"],
+      sab:["06:10","08:20","11:20","14:10","16:05","18:55","21:20"] },
+    { name:"Via Salaria / Via Torricelli", type:"stop",
+      lv:["05:18","06:13","07:28","08:23","09:58","11:23","12:38","13:53","14:53","16:08","17:13","18:58","20:08","21:23","22:38"],
+      sab:["06:13","08:23","11:23","13:53","16:08","18:58","21:23"] },
+    { name:"Via Salaria (Ponte del Grillo)", type:"stop",
+      lv:["05:19","06:14","07:29","08:24","09:59","11:24","12:39","13:54","14:54","16:09","17:14","18:59","20:09","21:24","22:39"],
+      sab:["06:14","08:24","11:24","13:54","16:09","18:59","21:24"] },
+    { name:"Via San Martino / Sant'Anzino", type:"stop",
+      lv:["05:21","06:16","07:31","08:26","10:01","11:26","12:41","13:56","14:56","16:11","17:16","19:01","20:11","21:26","22:41"],
+      sab:["06:16","08:26","11:26","14:16","16:11","19:01","21:26"] },
+    { name:"Via San Martino, 200", type:"stop",
+      lv:["05:22","06:17","07:32","08:27","10:02","11:27","12:42","13:57","14:57","16:12","17:17","19:02","20:12","21:27","22:42"],
+      sab:["06:17","08:27","11:27","13:57","16:12","19:02","21:27"] },
+    { name:"Via San Martino / Via Montedoro", type:"stop",
+      lv:["05:28","06:23","07:38","08:33","10:08","11:33","12:48","14:03","15:03","16:18","17:23","19:08","20:18","21:33","22:48"],
+      sab:["06:23","08:33","11:33","14:03","16:18","19:08","21:33"] },
+    { name:"Piazza Santa Maria (Istituto Superiore A. Frammartino)", type:"stop", lv:["07:40","14:05"], sab:[] },
+    { name:"Via Kennedy", type:"stop",
+      lv:["05:30","06:25","08:35","10:10","11:35","12:50","15:05","16:20","17:25","19:10","20:20","21:35","22:50"],
+      sab:["06:25","08:35","11:35","14:25","16:20","19:10","21:35"] },
+    { name:"Viale XXV Aprile", type:"stop",
+      lv:["05:31","06:26","08:36","10:11","11:36","12:51","15:06","16:21","17:26","19:11","20:21","21:36","22:51"],
+      sab:["06:26","08:36","11:36","14:26","16:21","19:11","21:36"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["05:33","06:28","08:38","10:13","11:38","12:53","15:08","16:23","17:28","19:13","20:23","21:38","22:53"],
+      sab:["06:28","08:38","11:38","14:28","16:23","19:13","21:38"] },
+    { name:"Via dello Stadio", type:"stop", lv:["07:41","14:06"], sab:[] },
+    { name:"Via dello Stadio / Via Sant'Anna di Stazzema", type:"stop", lv:[], sab:[] },
+    { name:"Via della Fonte (Piscina Comunale)", type:"stop", lv:["07:43","14:08"], sab:[] },
+    { name:"Piazza Pesciarelli", type:"stop", lv:[], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:["07:47","14:12"], sab:[] },
+    { name:"Via Di Vittorio", type:"stop", lv:["07:48","14:13"], sab:[] },
+    { name:"Via dell'Unione / Via Trebbia", type:"stop", lv:["07:52","14:17"], sab:[] },
+    { name:"Via dell'Unione / Via Adige", type:"stop", lv:["07:54","14:19"], sab:[] },
+    { name:"Via Di Vittorio", type:"stop", lv:["07:55","14:20"], sab:[] },
+    { name:"Via Ciceruacchio", type:"stop", lv:["07:56","14:21"], sab:[] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop",
+      lv:["05:35","06:30","08:00","08:40","10:15","11:40","12:55","14:25","15:10","16:25","17:30","19:15","20:25","21:40","22:55"],
+      sab:["06:30","08:40","11:40","14:30","16:25","19:15","21:40"] },
+    { name:"Viale B. Buozzi / Via Corsica", type:"stop", lv:[], sab:[] },
+    { name:"Via Valle dei Corsi (Fonte Nuova)", type:"terminal",
+      lv:["05:05","06:20","07:15","08:40","09:55","11:20","12:45","13:40","15:15","16:00","17:10","18:20","19:55","21:30"],
+      sab:["05:05","07:15","09:55","12:45","15:15","17:10","19:55"] }
+  ]
+};
+
+/* ═══════════════════ LINEA 24C ═══════════════════ */
+/* Linea circolare urbana, interamente nel comune di Monterotondo. Dati estratti automaticamente dal KML ASTRAL. */
+const linea24c_principale = {
+  routeLabel: 'Via dell\'Unione <span class="arrow">↻</span> Giro Principale (19 corse)',
+  sub: 'Linea circolare urbana, interamente all\'interno del comune di Monterotondo',
+  departures: {
+    lv:  ["06:57","07:25","07:55","08:35","09:05","09:35","10:05","11:05","12:20","13:10","13:40","14:10","14:35","15:35","16:05","16:30","17:05","18:05","19:05"],
+    sab: ["06:57","07:25","07:55","08:35","09:05","09:35","10:05","11:05","12:20","13:10","13:40","14:10","14:35","15:35","16:05","16:30","17:05","18:05","19:05"]
+  },
+  stops: [
+    { name:"Via dell'Unione", type:"terminal",
+      lv:["06:57","07:25","07:55","08:35","09:05","09:35","10:05","11:05","12:20","13:10","13:40","14:10","14:35","15:35","16:05","16:30","17:05","18:05","19:05"],
+      sab:["06:57","07:25","07:55","08:35","09:05","09:35","10:05","11:05","12:20","13:10","13:40","14:10","14:35","15:35","16:05","16:30","17:05","18:05","19:05"] },
+    { name:"Via Adige", type:"key",
+      lv:["07:00","07:28","07:58","08:38","09:08","09:38","10:08","11:08","12:23","13:13","13:43","14:13","14:38","15:38","16:08","16:33","17:08","18:08","19:08"],
+      sab:["07:00","07:28","07:58","08:38","09:08","09:38","10:08","11:08","12:23","13:13","13:43","14:13","14:38","15:38","16:08","16:33","17:08","18:08","19:08"] },
+    { name:"Viale Kennedy", type:"stop",
+      lv:["07:01","07:29","07:59","08:39","09:09","09:39","10:09","11:09","12:24","13:14","13:44","14:14","14:39","15:39","16:09","16:34","17:09","18:09","19:09"],
+      sab:["07:01","07:29","07:59","08:39","09:09","09:39","10:09","11:09","12:24","13:14","13:44","14:14","14:39","15:39","16:09","16:34","17:09","18:09","19:09"] },
+    { name:"Viale XXV Aprile", type:"stop",
+      lv:["07:02","07:30","08:00","08:40","09:10","09:40","10:10","11:10","12:25","13:15","13:45","14:15","14:40","15:40","16:10","16:35","17:10","18:10","19:10"],
+      sab:["07:02","07:30","08:00","08:40","09:10","09:40","10:10","11:10","12:25","13:15","13:45","14:15","14:40","15:40","16:10","16:35","17:10","18:10","19:10"] },
+    { name:"Via Matteotti", type:"stop",
+      lv:["07:03","07:31","08:01","08:41","09:11","09:41","10:11","11:11","12:26","13:16","13:46","14:16","14:41","15:41","16:11","16:36","17:11","18:11","19:11"],
+      sab:["07:03","07:31","08:01","08:41","09:11","09:41","10:11","11:11","12:26","13:16","13:46","14:16","14:41","15:41","16:11","16:36","17:11","18:11","19:11"] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop",
+      lv:["07:04","07:32","08:02","08:42","09:12","09:42","10:12","11:12","12:27","13:17","13:47","14:17","14:42","15:42","16:12","16:37","17:12","18:12","19:12"],
+      sab:["07:04","07:32","08:02","08:42","09:12","09:42","10:12","11:12","12:27","13:17","13:47","14:17","14:42","15:42","16:12","16:37","17:12","18:12","19:12"] },
+    { name:"Viale Buozzi / Via Corsica", type:"stop",
+      lv:["07:05","07:33","08:03","08:43","09:13","09:43","10:13","11:13","12:28","13:18","13:48","14:18","14:43","15:43","16:13","16:38","17:13","18:13","19:13"],
+      sab:["07:05","07:33","08:03","08:43","09:13","09:43","10:13","11:13","12:28","13:18","13:48","14:18","14:43","15:43","16:13","16:38","17:13","18:13","19:13"] },
+    { name:"Via Nenni / Viale Buozzi", type:"stop",
+      lv:["07:06","07:34","08:04","08:44","09:14","09:44","10:14","11:14","12:29","13:19","13:49","14:19","14:44","15:44","16:14","16:39","17:14","18:14","19:14"],
+      sab:["07:06","07:34","08:04","08:44","09:14","09:44","10:14","11:14","12:29","13:19","13:49","14:19","14:44","15:44","16:14","16:39","17:14","18:14","19:14"] },
+    { name:"Via Nenni 14", type:"stop",
+      lv:["07:07","07:35","08:05","08:45","09:15","09:45","10:15","11:15","12:30","13:20","13:50","14:20","14:45","15:45","16:15","16:40","17:15","18:15","19:15"],
+      sab:["07:07","07:35","08:05","08:45","09:15","09:45","10:15","11:15","12:30","13:20","13:50","14:20","14:45","15:45","16:15","16:40","17:15","18:15","19:15"] },
+    { name:"Via F. Cecconi (Convento Cappuccini)", type:"stop",
+      lv:["07:08","07:36","08:06","08:46","09:16","09:46","10:16","11:16","12:31","13:21","13:51","14:21","14:46","15:46","16:16","16:41","17:16","18:16","19:16"],
+      sab:["07:08","07:36","08:06","08:46","09:16","09:46","10:16","11:16","12:31","13:21","13:51","14:21","14:46","15:46","16:16","16:41","17:16","18:16","19:16"] },
+    { name:"Via Monti Crociferi", type:"stop",
+      lv:["07:09","07:37","08:07","08:47","09:17","09:47","10:17","11:17","12:32","13:22","13:52","14:22","14:47","15:47","16:17","16:42","17:17","18:17","19:17"],
+      sab:["07:09","07:37","08:07","08:47","09:17","09:47","10:17","11:17","12:32","13:22","13:52","14:22","14:47","15:47","16:17","16:42","17:17","18:17","19:17"] },
+    { name:"Via San Matteo", type:"stop",
+      lv:["07:10","07:38","08:08","08:48","09:18","09:48","10:18","11:18","12:33","13:23","13:53","14:23","14:48","15:48","16:18","16:43","17:18","18:18","19:18"],
+      sab:["07:10","07:38","08:08","08:48","09:18","09:48","10:18","11:18","12:33","13:23","13:53","14:23","14:48","15:48","16:18","16:43","17:18","18:18","19:18"] },
+    { name:"Via delle Mimose", type:"stop",
+      lv:["07:11","07:39","08:09","08:49","09:19","09:49","10:19","11:19","12:34","13:24","13:54","14:24","14:49","15:49","16:19","16:44","17:19","18:19","19:19"],
+      sab:["07:11","07:39","08:09","08:49","09:19","09:49","10:19","11:19","12:34","13:24","13:54","14:24","14:49","15:49","16:19","16:44","17:19","18:19","19:19"] },
+    { name:"Viale Cecconi 4", type:"stop",
+      lv:["07:12","07:40","08:10","08:50","09:20","09:50","10:20","11:20","12:35","13:25","13:55","14:25","14:50","15:50","16:20","16:45","17:20","18:20","19:20"],
+      sab:["07:12","07:40","08:10","08:50","09:20","09:50","10:20","11:20","12:35","13:25","13:55","14:25","14:50","15:50","16:20","16:45","17:20","18:20","19:20"] },
+    { name:"Via Corsica", type:"stop",
+      lv:["07:13","07:41","08:11","08:51","09:21","09:51","10:21","11:21","12:36","13:26","13:56","14:26","14:51","15:51","16:21","16:46","17:21","18:21","19:21"],
+      sab:["07:13","07:41","08:11","08:51","09:21","09:51","10:21","11:21","12:36","13:26","13:56","14:26","14:51","15:51","16:21","16:46","17:21","18:21","19:21"] },
+    { name:"Via Mazzini", type:"stop",
+      lv:["07:14","07:42","08:12","08:52","09:22","09:52","10:22","11:22","12:37","13:27","13:57","14:27","14:52","15:52","16:22","16:47","17:22","18:22","19:22"],
+      sab:["07:14","07:42","08:12","08:52","09:22","09:52","10:22","11:22","12:37","13:27","13:57","14:27","14:52","15:52","16:22","16:47","17:22","18:22","19:22"] },
+    { name:"Cimitero Vecchio", type:"stop",
+      lv:["07:16","07:44","08:14","08:54","09:24","09:54","10:24","11:24","12:39","13:29","13:59","14:29","14:54","15:54","16:24","16:49","17:24","18:24","19:24"],
+      sab:["07:16","07:44","08:14","08:54","09:24","09:54","10:24","11:24","12:39","13:29","13:59","14:29","14:54","15:54","16:24","16:49","17:24","18:24","19:24"] },
+    { name:"Via Isonzo", type:"stop",
+      lv:["07:17","07:45","08:15","08:55","09:25","09:55","12:40","13:30","14:00","14:30","16:25","16:50","17:25","18:25","19:25"],
+      sab:["07:17","07:45","08:15","08:55","09:25","09:55","12:40","13:30","14:00","14:30","16:25","16:50","17:25","18:25","19:25"] },
+    { name:"Via Pompili / Via Piave", type:"stop",
+      lv:["07:18","07:46","08:16","08:56","09:26","09:56","12:41","13:31","14:01","14:31","16:26","16:51","17:26","18:26","19:26"],
+      sab:["07:18","07:46","08:16","08:56","09:26","09:56","12:41","13:31","14:01","14:31","16:26","16:51","17:26","18:26","19:26"] },
+    { name:"Via dell'Unione", type:"terminal",
+      lv:["06:57","07:25","07:55","08:35","09:05","09:35","10:05","11:05","12:20","13:10","13:40","14:10","14:35","15:35","16:05","16:30","17:05","18:05","19:05"],
+      sab:["06:57","07:25","07:55","08:35","09:05","09:35","10:05","11:05","12:20","13:10","13:40","14:10","14:35","15:35","16:05","16:30","17:05","18:05","19:05"] }
+  ]
+};
+
+const linea24c_ridotto = {
+  routeLabel: 'Via dell\'Unione <span class="arrow">↻</span> Giro Ridotto (4 corse)',
+  sub: 'Linea circolare urbana, interamente all\'interno del comune di Monterotondo',
+  departures: {
+    lv:  ["10:30","11:30","15:00","16:00"],
+    sab: ["10:30","11:30","15:00","16:00"]
+  },
+  stops: [
+    { name:"Via dell'Unione", type:"terminal", lv:["10:30","11:30","15:00","16:00"], sab:["10:30","11:30","15:00","16:00"] },
+    { name:"Via Adige", type:"key", lv:[], sab:[] },
+    { name:"Viale Kennedy", type:"stop", lv:[], sab:[] },
+    { name:"Viale XXV Aprile", type:"stop", lv:[], sab:[] },
+    { name:"Via Matteotti", type:"stop", lv:[], sab:[] },
+    { name:"Via dei Pini (Ospedale Gonfalone)", type:"stop", lv:[], sab:[] },
+    { name:"Viale Buozzi / Via Corsica", type:"stop", lv:[], sab:[] },
+    { name:"Via Nenni / Viale Buozzi", type:"stop", lv:[], sab:[] },
+    { name:"Via Nenni 14", type:"stop", lv:[], sab:[] },
+    { name:"Via F. Cecconi (Convento Cappuccini)", type:"stop", lv:[], sab:[] },
+    { name:"Via Monti Crociferi", type:"stop", lv:[], sab:[] },
+    { name:"Via San Matteo", type:"stop", lv:[], sab:[] },
+    { name:"Via delle Mimose", type:"stop", lv:[], sab:[] },
+    { name:"Viale Cecconi 4", type:"stop", lv:[], sab:[] },
+    { name:"Via Corsica", type:"stop", lv:[], sab:[] },
+    { name:"Via Mazzini", type:"stop", lv:[], sab:[] },
+    { name:"Cimitero Vecchio", type:"stop", lv:[], sab:[] },
+    { name:"Cimitero Nuovo", type:"stop", lv:["10:27","11:27","14:57","15:57"], sab:["10:27","11:27","14:57","15:57"] },
+    { name:"Via dell'Unione", type:"terminal", lv:["10:30","11:30","15:00","16:00"], sab:["10:30","11:30","15:00","16:00"] }
+  ]
+};
+
+/* ═══════════════════ REGISTRO LINEE ═══════════════════ */
+const lines = {
+  linea3: { num: "3", name: "Linea 3", andata: linea3_andata, ritorno: linea3_ritorno },
+  linea4: { num: "4", name: "Linea 4", andata: linea4_andata, ritorno: linea4_ritorno },
+  linea5: { num: "5", name: "Linea 5", andata: linea5_andata, ritorno: linea5_ritorno },
+  linea10: { num: "10", name: "Linea 10", andata: linea10_andata, ritorno: linea10_ritorno },
+  linea18: { num: "18", name: "Linea 18", andata: linea18_andata, ritorno: linea18_ritorno },
+  linea19: { num: "19", name: "Linea 19", andata: linea19_andata, ritorno: linea19_ritorno },
+  linea24c: { num: "24C", name: "Linea 24C", andata: linea24c_principale, ritorno: linea24c_ridotto },
+  linea25: { num: "25", name: "Linea 25", andata: linea25_andata, ritorno: linea25_ritorno },
+  linea30: { num: "30", name: "Linea 30", andata: linea30_andata, ritorno: linea30_ritorno }
+};
+
+let currentLine = 'linea3';
+let currentDirection = 'andata';
+let currentDay = 'lv';
+const isDesktop = () => window.innerWidth >= 769;
+
+function currentLineObj() { return lines[currentLine]; }
+
+function currentData() {
+  const dir = currentDirection === 'andata' ? currentLineObj().andata : currentLineObj().ritorno;
+  return dir || currentLineObj().andata;
+}
+
+function buildLineSelector() {
+  const bar = document.getElementById('line-select-bar');
+  bar.innerHTML = '';
+  Object.keys(lines).forEach(key => {
+    const btn = document.createElement('button');
+    btn.className = 'line-select-btn' + (key === currentLine ? ' active' : '');
+    btn.textContent = lines[key].name;
+    btn.onclick = () => setLine(key);
+    bar.appendChild(btn);
+  });
+}
+
+function setLine(lineKey) {
+  currentLine = lineKey;
+  currentDirection = 'andata';
+  document.querySelectorAll('.line-select-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === lines[lineKey].name);
+  });
+  document.getElementById('line-badge').textContent = lines[lineKey].num;
+  refreshView();
+}
+
+function updateDirectionButtons() {
+  const hasRitorno = !!currentLineObj().ritorno;
+  const btnR = document.getElementById('btn-ritorno');
+  btnR.disabled = !hasRitorno;
+  document.getElementById('btn-andata').classList.toggle('active', currentDirection === 'andata');
+  btnR.classList.toggle('active', currentDirection === 'ritorno');
+  document.getElementById('no-data-note').classList.toggle('visible', !hasRitorno && currentDirection !== 'andata');
+}
+
+function setDirection(dir) {
+  if (dir === 'ritorno' && !currentLineObj().ritorno) {
+    document.getElementById('no-data-note').classList.add('visible');
+    return;
+  }
+  currentDirection = dir;
+  document.getElementById('no-data-note').classList.remove('visible');
+  refreshView();
+}
+
+function refreshView() {
+  updateDirectionButtons();
+  document.getElementById('header-route').innerHTML = currentData().routeLabel;
+  document.getElementById('header-sub').textContent = currentData().sub;
+  buildStops();
+  updateDepSummary();
+  updateTableHeaderCounts();
+  applyLayout();
+}
+
+function setDay(day) {
+  currentDay = day;
+  document.getElementById('btn-lv').classList.toggle('active', day === 'lv');
+  document.getElementById('btn-sab').classList.toggle('active', day === 'sab');
+  updateMobileVisibility();
+  updateDepSummary();
+}
+
+function updateMobileVisibility() {
+  if (isDesktop()) return;
+  document.querySelectorAll('.times-lv').forEach(el => el.style.display = currentDay === 'lv' ? 'flex' : 'none');
+  document.querySelectorAll('.times-sab').forEach(el => el.style.display = currentDay === 'sab' ? 'flex' : 'none');
+}
+
+function updateDepSummary() {
+  const dayLabel = currentDay === 'lv' ? 'Lun—Ven' : 'Sabato';
+  const originName = currentData().stops[0].name;
+  document.getElementById('dep-label').textContent = `Partenze da ${originName} · ${dayLabel}`;
+  const el = document.getElementById('dep-chips');
+  el.innerHTML = '';
+  currentData().departures[currentDay].forEach(t => {
+    const ch = document.createElement('span');
+    ch.className = 'dep-chip'; ch.textContent = t;
+    el.appendChild(ch);
+  });
+}
+
+function updateTableHeaderCounts() {
+  document.getElementById('th-count-lv').textContent = `${currentData().departures.lv.length} corse`;
+  document.getElementById('th-count-sab').textContent = `${currentData().departures.sab.length} corse`;
+}
+
+function buildStops() {
+  const list = document.getElementById('stops-list');
+  list.innerHTML = '';
+  currentData().stops.forEach(stop => {
+    const isT = stop.type === 'terminal', isK = stop.type === 'key';
+    const row = document.createElement('div');
+    row.className = 'stop-row' + (isT ? ' is-terminal' : isK ? ' is-key' : '');
+
+    const dotType = isT ? 'terminal' : isK ? 'key' : '';
+
+    row.innerHTML = `
+      <div class="dot-col"><div class="dot ${dotType}"></div></div>
+      <div class="stop-content">
+        <div class="stop-name">${stop.name}</div>
+        <div class="times-lv">${stop.lv.map(t => `<span class="t-chip">${t}</span>`).join('')}</div>
+        <div class="times-sab">${stop.sab.map(t => `<span class="t-chip">${t}</span>`).join('')}</div>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function applyLayout() {
+  const desktop = isDesktop();
+  const header = document.getElementById('table-header');
+  header.style.display = desktop ? 'flex' : 'none';
+
+  if (desktop) {
+    document.querySelectorAll('.times-lv').forEach(el => el.style.display = 'flex');
+    document.querySelectorAll('.times-sab').forEach(el => el.style.display = 'flex');
+  } else {
+    updateMobileVisibility();
+  }
+}
+
+// Init
+buildLineSelector();
+refreshView();
+
+// Riadatta se la finestra viene ridimensionata
+window.addEventListener('resize', applyLayout);
+</script>
+</body>
+</html>
