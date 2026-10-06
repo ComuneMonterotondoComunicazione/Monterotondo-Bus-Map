@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Busmap Interattivo — Comune di Monterotondo</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect x='4' y='4' width='112' height='112' rx='28' fill='%231A56A4'/%3E%3Cpath d='M28 88V34L60 66L92 34V88' fill='none' stroke='%23F5D000' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='28' cy='88' r='8' fill='%231A56A4' stroke='white' stroke-width='4.5'/%3E%3Ccircle cx='28' cy='34' r='8' fill='%231A56A4' stroke='white' stroke-width='4.5'/%3E%3Ccircle cx='60' cy='66' r='8' fill='%231A56A4' stroke='white' stroke-width='4.5'/%3E%3Ccircle cx='92' cy='34' r='8' fill='%231A56A4' stroke='white' stroke-width='4.5'/%3E%3Ccircle cx='92' cy='88' r='10' fill='%23FF6B3D' stroke='white' stroke-width='4.5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,6 +18,10 @@
   --blue-light: #E8F0FB;
   --gold: #F5D000;
   --gold-light: #FFF3DC;
+  --school-accent: #FF6B3D;
+  --school-accent-dark: #C1440E;
+  --school-rgb: 255,107,61;
+  --school-grad: linear-gradient(150deg, #FFC299 0%, var(--school-accent) 55%, var(--school-accent-dark) 100%);
   --line-color: #1A56A4;
   --border: #DDE3EE;
   --text-primary: #0D1B2A;
@@ -555,6 +560,14 @@ body {
   }
   #search-mode .search-results-empty { grid-column: 1 / -1; padding: 30px 4px; font-size: 14px; }
   .search-result-card { margin-top: 0; }
+
+  #school-mode { padding: 36px 32px 48px; }
+  #school-mode .search-results {
+    width: 100%; max-width: 900px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
+  }
+  #school-mode .search-results-empty { grid-column: 1 / -1; padding: 20px 4px; font-size: 14px; }
+  .school-info-note, .school-group-title { max-width: 900px; margin-left: auto; margin-right: auto; }
 }
 
 /* ═══════════════════════════════════════
@@ -565,14 +578,94 @@ body {
   display: flex; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 3px;
 }
 .mode-toggle-btn {
+  position: relative;
   flex: 1; padding: 10px 8px; border: none; border-radius: 6px; background: transparent;
   color: rgba(255,255,255,0.6); font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
   font-size: 12.5px; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer;
   transition: all 0.18s;
 }
 .mode-toggle-btn.active { background: var(--gold); color: var(--blue-dark); }
+#mode-btn-school.active {
+  background: var(--school-grad) !important; color: #fff;
+  box-shadow: 0 4px 14px rgba(var(--school-rgb),0.5) !important;
+}
+
+.new-badge {
+  position: absolute; top: -8px; right: 2px; background: var(--school-grad); color: #fff;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 8.5px; font-weight: 800;
+  letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 6px; border-radius: 10px;
+  animation: badgePulse 1.6s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(var(--school-rgb),0.6);
+}
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--school-rgb),0.6); }
+  50% { box-shadow: 0 0 0 7px rgba(var(--school-rgb),0); }
+}
+
+@keyframes schoolWiggle {
+  0%, 82%, 100% { transform: translateY(0) rotate(0deg); }
+  85% { transform: translateY(-3px) rotate(-3deg); }
+  88% { transform: translateY(0) rotate(3deg); }
+  91% { transform: translateY(-2px) rotate(-2deg); }
+  94% { transform: translateY(0) rotate(0deg); }
+}
+#mode-btn-school:not(.active) { animation: schoolWiggle 3.2s ease-in-out infinite; }
+
+.school-announce-overlay {
+  position: fixed; inset: 0; background: rgba(3,10,28,0.72); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.school-announce-card {
+  position: relative; width: 100%; max-width: 380px; background: var(--blue-dark);
+  border: 1.5px solid rgba(var(--school-rgb),0.5); border-radius: 16px; padding: 32px 26px 26px;
+  text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.school-announce-close {
+  position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.5); font-size: 22px; line-height: 1; padding: 4px;
+}
+.school-announce-close:hover { color: #fff; }
+.school-announce-icon { font-size: 34px; margin-bottom: 6px; }
+.school-announce-title {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 20px;
+  letter-spacing: 0.02em; text-transform: uppercase;
+  background: var(--school-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 18px rgba(var(--school-rgb),0.5); margin-bottom: 10px;
+}
+.school-announce-text { font-size: 13.5px; color: rgba(255,255,255,0.75); line-height: 1.6; margin-bottom: 20px; }
+.school-announce-cta {
+  width: 100%; padding: 13px; border: none; border-radius: 8px; cursor: pointer;
+  background: var(--school-grad); color: #fff; font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900; font-size: 14.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  box-shadow: 0 6px 18px rgba(var(--school-rgb),0.45);
+}
+.school-announce-cta:hover { filter: brightness(1.08); }
+
+.school-mode-header { padding: 18px 20px 4px; background: var(--blue-dark); }
+.school-mode-title {
+  display: block; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 19px;
+  letter-spacing: 0.03em; text-transform: uppercase;
+  background: var(--school-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 18px rgba(var(--school-rgb),0.5);
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.3));
+}
+.school-mode-sub { display: block; font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 3px; }
 
 .search-panel { background: var(--blue-dark); padding: 18px 20px 22px; }
+#school-mode .search-field-label { color: var(--school-accent); }
+#school-mode .search-cta {
+  background: var(--school-grad) !important; color: #fff;
+  box-shadow: 0 6px 18px rgba(var(--school-rgb),0.45) !important;
+}
+#school-mode .search-cta:hover { filter: brightness(1.08); }
+#school-mode .search-day-btn.active {
+  background: var(--school-grad) !important; color: #fff;
+  box-shadow: 0 0 14px rgba(var(--school-rgb),0.45) !important;
+}
+#school-results .search-result-card:hover {
+  border-color: var(--school-accent); box-shadow: 0 4px 14px rgba(var(--school-rgb),0.28);
+}
+#school-results .school-group-title { border-top-color: rgba(var(--school-rgb),0.35); color: var(--school-accent-dark); }
 .search-field-label {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px;
   letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold);
@@ -584,6 +677,7 @@ body {
   background: rgba(255,255,255,0.07); color: #fff; font-family: 'Barlow', sans-serif; font-size: 14px;
 }
 .search-input::placeholder { color: rgba(255,255,255,0.35); }
+select.search-input option { color: #0a1f47; background: #fff; }
 .search-row { display: flex; gap: 10px; align-items: flex-end; }
 .search-row > div:first-child { flex: 1; }
 .swap-btn {
@@ -626,6 +720,15 @@ body {
 .search-results-empty {
   padding: 20px 4px; text-align: center; color: var(--text-muted); font-size: 13px; line-height: 1.6;
 }
+.school-info-note {
+  padding: 16px 20px 0; background: #fff; font-size: 13px; color: var(--text-muted); line-height: 1.5;
+}
+.school-info-note strong { color: var(--blue-dark); }
+.school-group-title {
+  padding: 20px 20px 4px; background: #fff; font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800; font-size: 13.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--blue-dark); border-top: 1px solid var(--border);
+}
 .search-result-card {
   border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-top: 12px;
   cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
@@ -643,6 +746,13 @@ body {
 .search-result-times { display: flex; flex-wrap: wrap; gap: 5px; }
 .search-result-note {
   font-size: 10.5px; color: var(--text-muted); margin-top: 6px; font-style: italic;
+}
+.search-result-walk { margin-top: 8px; }
+.walk-chip {
+  display: inline-block; padding: 4px 11px; border-radius: 20px;
+  background: rgba(var(--school-rgb),0.14); border: 1.5px solid rgba(var(--school-rgb),0.5);
+  color: var(--school-accent-dark); font-weight: 800; font-size: 12px;
+  font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.02em; font-style: normal;
 }
 
 /* ═══════════════════════════════════════
@@ -763,6 +873,8 @@ body::after {
   height: 2px;
   background: linear-gradient(90deg, transparent, rgba(245,208,0,0.7) 50%, transparent);
 }
+.app-logo-h { display: block; width: min(330px, 84%); height: auto; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.45)); }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .app-title-row {
   display: flex; align-items: center; justify-content: center; gap: 10px;
 }
@@ -807,21 +919,27 @@ body::after {
 </head>
 <body>
 
+<!-- BANNER NOVITÀ: Bus-Map Scuole -->
+<div id="school-announce-overlay" class="school-announce-overlay" style="display:none">
+  <div class="school-announce-card">
+    <button class="school-announce-close" id="school-announce-close" aria-label="Chiudi">&times;</button>
+    <div class="school-announce-icon">🏫</div>
+    <div class="school-announce-title">Novità: Bus-Map Scuole</div>
+    <div class="school-announce-text">Trova in un attimo gli autobus per l'ingresso e l'uscita da scuola — per istituto e classe.</div>
+    <button class="school-announce-cta" id="school-announce-cta">Scopri la sezione →</button>
+  </div>
+</div>
+
 <div class="card">
 
   <!-- TITOLO -->
   <div class="app-title-bar">
     <div class="app-title-row">
-      <svg width="22" height="22" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 6px rgba(245,208,0,0.55));">
-        <rect x="8" y="14" width="48" height="30" rx="5" stroke="#F5D000" stroke-width="4" fill="none"/>
-        <line x1="8" y1="26" x2="56" y2="26" stroke="#F5D000" stroke-width="3"/>
-        <line x1="32" y1="26" x2="32" y2="44" stroke="#F5D000" stroke-width="3"/>
-        <circle cx="17" cy="50" r="5" stroke="#F5D000" stroke-width="4" fill="none"/>
-        <circle cx="47" cy="50" r="5" stroke="#F5D000" stroke-width="4" fill="none"/>
-        <rect x="3" y="30" width="4" height="8" rx="1" fill="#F5D000"/>
-        <rect x="57" y="30" width="4" height="8" rx="1" fill="#F5D000"/>
-      </svg>
-      <div class="app-title">Busmap Interattivo</div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 416.5 120" class="app-logo-h" role="img"><title>Busmap Interattivo - Comune di Monterotondo</title><rect x="4" y="4" width="112" height="112" rx="28" fill="#1A56A4"/>
+<path d="M28 88V34L60 66L92 34V88" fill="none" stroke="#F5D000" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="28" cy="88" r="8" fill="#1A56A4" stroke="#fff" stroke-width="4.5"/><circle cx="28" cy="34" r="8" fill="#1A56A4" stroke="#fff" stroke-width="4.5"/><circle cx="60" cy="66" r="8" fill="#1A56A4" stroke="#fff" stroke-width="4.5"/><circle cx="92" cy="34" r="8" fill="#1A56A4" stroke="#fff" stroke-width="4.5"/>
+<circle cx="92" cy="88" r="10" fill="#FF6B3D" stroke="#fff" stroke-width="4.5"/><path fill="#FFFFFF" d="M163.17 74H145.44Q144.86 74 144.52 73.66Q144.18 73.33 144.18 72.74V16.46Q144.18 15.87 144.52 15.54Q144.86 15.2 145.44 15.2H160.65Q169.8 15.2 174.97 19.32Q180.14 23.43 180.14 31.75Q180.14 39.48 175.35 43.26Q174.93 43.59 175.18 43.84Q181.31 48.55 181.31 57.45Q181.31 65.43 176.19 69.72Q171.06 74 163.17 74ZM159.98 29.23V37.63Q159.98 38.13 160.48 38.13H160.9Q164.68 38.13 164.68 33.43Q164.68 28.72 160.9 28.72H160.48Q159.98 28.72 159.98 29.23ZM165.52 55.1Q165.52 52.5 164.55 50.94Q163.59 49.39 161.99 49.39H160.48Q159.98 49.39 159.98 49.89V59.97Q159.98 60.48 160.48 60.48H161.91Q163.5 60.48 164.51 59.09Q165.52 57.7 165.52 55.1Z M186.67 56.53V16.46Q186.67 15.87 187.01 15.54Q187.34 15.2 187.93 15.2H201.2Q201.79 15.2 202.13 15.54Q202.46 15.87 202.46 16.46V58.04Q202.46 59.47 203.14 60.31Q203.81 61.15 204.9 61.15Q205.99 61.15 206.62 60.31Q207.25 59.47 207.25 58.04V16.46Q207.25 15.87 207.59 15.54Q207.92 15.2 208.51 15.2H221.78Q222.37 15.2 222.71 15.54Q223.04 15.87 223.04 16.46V56.53Q223.04 61.9 220.78 66.02Q218.51 70.14 214.39 72.4Q210.28 74.67 204.9 74.67Q199.44 74.67 195.32 72.4Q191.21 70.14 188.94 66.02Q186.67 61.9 186.67 56.53Z M228.91 58.88V56.28Q228.91 55.69 229.24 55.35Q229.58 55.02 230.17 55.02H243.27Q243.86 55.02 244.2 55.35Q244.53 55.69 244.53 56.28V58.12Q244.53 59.47 245.2 60.31Q245.88 61.15 246.88 61.15Q247.89 61.15 248.56 60.39Q249.24 59.64 249.24 58.46Q249.24 57.03 247.89 55.65Q246.55 54.26 242.26 51.24Q238.06 48.3 235.33 45.86Q232.6 43.42 230.59 39.73Q228.57 36.03 228.57 31.24Q228.57 26.29 230.8 22.51Q233.02 18.73 237.1 16.63Q241.17 14.53 246.46 14.53Q251.84 14.53 255.91 16.63Q259.99 18.73 262.21 22.51Q264.44 26.29 264.44 31.24V33.09Q264.44 33.68 264.1 34.02Q263.77 34.35 263.18 34.35H250.16Q249.57 34.35 249.24 34.02Q248.9 33.68 248.9 33.09V30.91Q248.9 29.65 248.23 28.85Q247.56 28.05 246.46 28.05Q245.37 28.05 244.74 28.89Q244.11 29.73 244.11 31.16Q244.11 32.84 245.46 34.39Q246.8 35.95 250.83 38.89Q256.21 42.84 258.94 45.27Q261.67 47.71 263.22 50.77Q264.78 53.84 264.78 57.96Q264.78 65.6 259.82 70.14Q254.86 74.67 246.8 74.67Q241.42 74.67 237.39 72.66Q233.36 70.64 231.13 67.07Q228.91 63.5 228.91 58.88Z"/><path fill="#F5D000" d="M303.37 15.2H316.47Q317.06 15.2 317.4 15.54Q317.73 15.87 317.73 16.46V72.74Q317.73 73.33 317.4 73.66Q317.06 74 316.47 74H303.2Q302.61 74 302.28 73.66Q301.94 73.33 301.94 72.74V38.55Q301.94 38.22 301.73 38.13Q301.52 38.05 301.35 38.38L296.56 46.45L295.72 47.96H295.64L290.1 38.38Q289.93 38.05 289.72 38.09Q289.51 38.13 289.51 38.55V72.74Q289.51 73.33 289.17 73.66Q288.84 74 288.25 74H274.98Q274.39 74 274.05 73.66Q273.72 73.33 273.72 72.74V16.46Q273.72 15.87 274.05 15.54Q274.39 15.2 274.98 15.2H288.08Q289.17 15.2 289.59 16.12L295.47 26.88Q295.64 27.13 295.85 27.17Q296.06 27.21 296.14 26.88L301.86 16.12Q302.36 15.2 303.37 15.2Z M348.8 72.82 347.87 66.52Q347.87 66.36 347.7 66.19Q347.54 66.02 347.28 66.02H339.89Q339.64 66.02 339.47 66.19Q339.3 66.36 339.3 66.52L338.46 72.82Q338.38 74 337.12 74H323.93Q322.59 74 322.84 72.66L334.77 16.29Q335.02 15.2 336.2 15.2H351.48Q352.66 15.2 352.91 16.29L364.84 72.66V72.99Q364.84 74 363.66 74H350.14Q348.88 74 348.8 72.82ZM341.57 53.92H345.52Q346.11 53.92 345.94 53.42L343.67 38.3Q343.59 37.96 343.42 37.96Q343.25 37.96 343.17 38.3L341.15 53.42Q341.15 53.92 341.57 53.92Z M407.5 34.1Q407.5 39.48 405.44 43.59Q403.38 47.71 399.68 49.93Q395.99 52.16 391.12 52.16H386.41Q385.91 52.16 385.91 52.66V72.74Q385.91 73.33 385.57 73.66Q385.24 74 384.65 74H371.38Q370.79 74 370.45 73.66Q370.12 73.33 370.12 72.74V16.46Q370.12 15.87 370.45 15.54Q370.79 15.2 371.38 15.2H390.28Q395.32 15.2 399.22 17.59Q403.13 19.99 405.31 24.27Q407.5 28.56 407.5 34.1ZM391.7 34.44Q391.7 31.66 390.57 30.19Q389.44 28.72 387.5 28.72H386.41Q385.91 28.72 385.91 29.23V39.48Q385.91 39.98 386.41 39.98H387.5Q389.44 39.98 390.57 38.59Q391.7 37.21 391.7 34.44Z"/><path fill="#9FB3D6" d="M143.06 103.71V87.49Q143.06 87.37 143.14 87.28Q143.22 87.2 143.34 87.2H146.15Q146.27 87.2 146.36 87.28Q146.44 87.37 146.44 87.49V103.71Q146.44 103.83 146.36 103.92Q146.27 104 146.15 104H143.34Q143.22 104 143.14 103.92Q143.06 103.83 143.06 103.71Z M171.03 87.2H173.81Q173.93 87.2 174.01 87.28Q174.1 87.37 174.1 87.49V103.71Q174.1 103.83 174.01 103.92Q173.93 104 173.81 104H170.64Q170.4 104 170.33 103.76L167.35 94.47Q167.33 94.4 167.27 94.41Q167.21 94.42 167.21 94.5L167.23 103.71Q167.23 103.83 167.15 103.92Q167.07 104 166.95 104H164.16Q164.04 104 163.96 103.92Q163.87 103.83 163.87 103.71V87.49Q163.87 87.37 163.96 87.28Q164.04 87.2 164.16 87.2H167.31Q167.55 87.2 167.62 87.44L170.62 96.73Q170.64 96.8 170.7 96.79Q170.76 96.78 170.76 96.7L170.74 87.49Q170.74 87.37 170.82 87.28Q170.91 87.2 171.03 87.2Z M201.11 87.49V89.82Q201.11 89.94 201.02 90.02Q200.94 90.1 200.82 90.1H197.82Q197.7 90.1 197.7 90.22V103.71Q197.7 103.83 197.62 103.92Q197.53 104 197.41 104H194.6Q194.48 104 194.4 103.92Q194.32 103.83 194.32 103.71V90.22Q194.32 90.1 194.2 90.1H191.32Q191.2 90.1 191.11 90.02Q191.03 89.94 191.03 89.82V87.49Q191.03 87.37 191.11 87.28Q191.2 87.2 191.32 87.2H200.82Q200.94 87.2 201.02 87.28Q201.11 87.37 201.11 87.49Z M226.56 90.1H221.54Q221.42 90.1 221.42 90.22V94.02Q221.42 94.14 221.54 94.14H224.42Q224.54 94.14 224.63 94.22Q224.71 94.3 224.71 94.42V96.75Q224.71 96.87 224.63 96.96Q224.54 97.04 224.42 97.04H221.54Q221.42 97.04 221.42 97.16V100.98Q221.42 101.1 221.54 101.1H226.56Q226.68 101.1 226.76 101.18Q226.85 101.26 226.85 101.38V103.71Q226.85 103.83 226.76 103.92Q226.68 104 226.56 104H218.33Q218.21 104 218.12 103.92Q218.04 103.83 218.04 103.71V87.49Q218.04 87.37 218.12 87.28Q218.21 87.2 218.33 87.2H226.56Q226.68 87.2 226.76 87.28Q226.85 87.37 226.85 87.49V89.82Q226.85 89.94 226.76 90.02Q226.68 90.1 226.56 90.1Z M250.14 103.76 248.29 97.14Q248.24 97.04 248.17 97.04H247.35Q247.23 97.04 247.23 97.16V103.71Q247.23 103.83 247.15 103.92Q247.07 104 246.95 104H244.14Q244.02 104 243.93 103.92Q243.85 103.83 243.85 103.71V87.49Q243.85 87.37 243.93 87.28Q244.02 87.2 244.14 87.2H248.99Q250.31 87.2 251.34 87.84Q252.37 88.47 252.93 89.62Q253.5 90.78 253.5 92.26Q253.5 93.68 252.96 94.76Q252.42 95.84 251.46 96.44Q251.41 96.46 251.39 96.5Q251.36 96.54 251.39 96.58L253.59 103.66L253.62 103.76Q253.62 104 253.35 104H250.47Q250.21 104 250.14 103.76ZM247.23 90.22V94.33Q247.23 94.45 247.35 94.45H248.43Q249.18 94.45 249.65 93.86Q250.11 93.27 250.11 92.29Q250.11 91.28 249.65 90.69Q249.18 90.1 248.43 90.1H247.35Q247.23 90.1 247.23 90.22Z M277.2 103.74 276.81 101.43Q276.81 101.31 276.67 101.31H273.62Q273.48 101.31 273.48 101.43L273.09 103.74Q273.07 104 272.78 104H269.97Q269.66 104 269.73 103.69L273.26 87.46Q273.31 87.2 273.57 87.2H276.81Q277.08 87.2 277.12 87.46L280.63 103.69L280.65 103.78Q280.65 104 280.39 104H277.51Q277.22 104 277.2 103.74ZM274.05 98.7H276.21Q276.33 98.7 276.31 98.58L275.18 92.02Q275.16 91.95 275.11 91.95Q275.06 91.95 275.04 92.02L273.96 98.58Q273.96 98.7 274.05 98.7Z M306.92 87.49V89.82Q306.92 89.94 306.83 90.02Q306.75 90.1 306.63 90.1H303.63Q303.51 90.1 303.51 90.22V103.71Q303.51 103.83 303.43 103.92Q303.34 104 303.22 104H300.41Q300.29 104 300.21 103.92Q300.13 103.83 300.13 103.71V90.22Q300.13 90.1 300.01 90.1H297.13Q297.01 90.1 296.92 90.02Q296.84 89.94 296.84 89.82V87.49Q296.84 87.37 296.92 87.28Q297.01 87.2 297.13 87.2H306.63Q306.75 87.2 306.83 87.28Q306.92 87.37 306.92 87.49Z M333.45 87.49V89.82Q333.45 89.94 333.36 90.02Q333.28 90.1 333.16 90.1H330.16Q330.04 90.1 330.04 90.22V103.71Q330.04 103.83 329.96 103.92Q329.87 104 329.75 104H326.94Q326.82 104 326.74 103.92Q326.66 103.83 326.66 103.71V90.22Q326.66 90.1 326.54 90.1H323.66Q323.54 90.1 323.45 90.02Q323.37 89.94 323.37 89.82V87.49Q323.37 87.37 323.45 87.28Q323.54 87.2 323.66 87.2H333.16Q333.28 87.2 333.36 87.28Q333.45 87.37 333.45 87.49Z M350.38 103.71V87.49Q350.38 87.37 350.46 87.28Q350.55 87.2 350.67 87.2H353.48Q353.6 87.2 353.68 87.28Q353.76 87.37 353.76 87.49V103.71Q353.76 103.83 353.68 103.92Q353.6 104 353.48 104H350.67Q350.55 104 350.46 103.92Q350.38 103.83 350.38 103.71Z M374.13 103.74 370.69 87.51 370.67 87.42Q370.67 87.2 370.93 87.2H374.03Q374.32 87.2 374.34 87.46L376 98.02Q376.02 98.12 376.07 98.12Q376.12 98.12 376.14 98.02L377.75 87.46Q377.77 87.2 378.06 87.2H381.06Q381.37 87.2 381.3 87.51L377.85 103.74Q377.8 104 377.53 104H374.44Q374.17 104 374.13 103.74Z M397.97 99.44V91.76Q397.97 89.6 399.29 88.3Q400.61 87.01 402.82 87.01Q405.02 87.01 406.36 88.3Q407.69 89.6 407.69 91.76V99.44Q407.69 101.6 406.36 102.9Q405.02 104.19 402.82 104.19Q400.61 104.19 399.29 102.9Q397.97 101.6 397.97 99.44ZM404.3 99.58V91.62Q404.3 90.85 403.9 90.38Q403.49 89.91 402.82 89.91Q402.14 89.91 401.75 90.38Q401.35 90.85 401.35 91.62V99.58Q401.35 100.35 401.75 100.82Q402.14 101.29 402.82 101.29Q403.49 101.29 403.9 100.82Q404.3 100.35 404.3 99.58Z"/></svg>
+      <h1 class="sr-only">Busmap Interattivo</h1>
     </div>
     <div class="app-subtitle">Realizzato da</div>
     <div class="app-subtitle">Comune di Monterotondo</div>
@@ -832,6 +950,7 @@ body::after {
     <div class="mode-toggle-bar">
       <button class="mode-toggle-btn active" id="mode-btn-browse" onclick="setAppMode('browse')">🚌 Sfoglia per linea</button>
       <button class="mode-toggle-btn" id="mode-btn-search" onclick="setAppMode('search')">🔍 Cerca fermata</button>
+      <button class="mode-toggle-btn" id="mode-btn-school" onclick="setAppMode('school')">🏫 Bus-Map Scuole<span class="new-badge" id="school-new-badge">Novità</span></button>
     </div>
   </div>
 
@@ -916,7 +1035,7 @@ body::after {
     <div class="search-panel-col-left">
       <div class="search-field-label" style="margin-top:0">Fermata di partenza</div>
       <div class="autocomplete-wrap">
-        <input class="search-input" id="search-from" placeholder="Es. Stazione FS Monterotondo" autocomplete="off">
+        <input class="search-input" id="search-from" placeholder="Es. Stazione FS Monterotondo, oppure &quot;Qualsiasi fermata&quot;" autocomplete="off">
         <div class="autocomplete-list" id="search-from-list"></div>
       </div>
 
@@ -951,6 +1070,53 @@ body::after {
 
   <div class="search-results" id="search-results"></div>
 </div>
+<!-- fine #search-mode -->
+
+<!-- MODALITÀ SCUOLE -->
+<div id="school-mode" style="display:none">
+  <div class="school-mode-header">
+    <span class="school-mode-title">🏫 Bus-Map Scuole</span>
+    <span class="school-mode-sub">Orari autobus per l'ingresso e l'uscita da scuola, per istituto e classe</span>
+  </div>
+  <div class="search-panel">
+    <div class="search-panel-col-left">
+      <div class="search-field-label" style="margin-top:0">Istituto</div>
+      <select class="search-input" id="school-select" onchange="onSchoolChange()"></select>
+
+      <div class="search-field-label">Classe</div>
+      <select class="search-input" id="school-class"></select>
+
+      <div class="search-field-label">Fermata di partenza (opzionale)</div>
+      <div class="autocomplete-wrap">
+        <input class="search-input" id="school-from" placeholder="Lascia vuoto per vedere tutte le linee" autocomplete="off">
+        <div class="autocomplete-list" id="school-from-list"></div>
+      </div>
+    </div>
+
+    <div class="search-panel-col-right">
+      <div class="search-field-label" style="margin-top:0">Giorno</div>
+      <select class="search-input" id="school-day">
+        <option value="lun">Lunedì</option>
+        <option value="mar">Martedì</option>
+        <option value="mer">Mercoledì</option>
+        <option value="gio">Giovedì</option>
+        <option value="ven">Venerdì</option>
+      </select>
+
+      <div class="search-field-label">Cosa cerchi</div>
+      <div class="search-day-toggle">
+        <button class="search-day-btn active" id="school-filter-entrambi" onclick="setSchoolFilter('entrambi')">Entrambi</button>
+        <button class="search-day-btn" id="school-filter-ingresso" onclick="setSchoolFilter('ingresso')">Ingresso</button>
+        <button class="search-day-btn" id="school-filter-uscita" onclick="setSchoolFilter('uscita')">Uscita</button>
+      </div>
+
+      <button class="search-cta" onclick="runSchoolSearch()">Trova gli autobus</button>
+    </div>
+  </div>
+
+  <div id="school-results"></div>
+</div>
+<!-- fine #school-mode -->
 
   <!-- FOOTER -->
   <div class="footer">
@@ -2365,8 +2531,257 @@ function applyLayout() {
 function setAppMode(mode) {
   document.getElementById('browse-mode').style.display = mode === 'browse' ? '' : 'none';
   document.getElementById('search-mode').style.display = mode === 'search' ? '' : 'none';
+  document.getElementById('school-mode').style.display = mode === 'school' ? '' : 'none';
   document.getElementById('mode-btn-browse').classList.toggle('active', mode === 'browse');
   document.getElementById('mode-btn-search').classList.toggle('active', mode === 'search');
+  document.getElementById('mode-btn-school').classList.toggle('active', mode === 'school');
+}
+
+/* Badge "Novità" e banner di annuncio: visibili fino al 30 novembre 2026, poi spariscono automaticamente per tutti */
+const SCHOOL_ANNOUNCE_EXPIRY = new Date('2026-11-30T23:59:59');
+
+(function initSchoolBadge() {
+  if (new Date() > SCHOOL_ANNOUNCE_EXPIRY) {
+    const badge = document.getElementById('school-new-badge');
+    if (badge) badge.style.display = 'none';
+    const btn = document.getElementById('mode-btn-school');
+    if (btn) btn.style.animation = 'none';
+  }
+})();
+
+function closeSchoolAnnounce() {
+  document.getElementById('school-announce-overlay').style.display = 'none';
+  try { localStorage.setItem('schoolAnnounceSeen', '1'); } catch (e) {}
+}
+(function initSchoolAnnounce() {
+  if (new Date() > SCHOOL_ANNOUNCE_EXPIRY) return;
+  let alreadySeen = false;
+  try { alreadySeen = !!localStorage.getItem('schoolAnnounceSeen'); } catch (e) {}
+  if (alreadySeen) return;
+  document.getElementById('school-announce-overlay').style.display = 'flex';
+  document.getElementById('school-announce-close').addEventListener('click', closeSchoolAnnounce);
+  document.getElementById('school-announce-cta').addEventListener('click', () => {
+    closeSchoolAnnounce();
+    setAppMode('school');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+
+/* ═══════════════════════════════════════
+   SCUOLE: fermata di riferimento + orari di ingresso/uscita per classe
+═══════════════════════════════════════ */
+function ogniGiorno(t) { return { lun: t, mar: t, mer: t, gio: t, ven: t }; }
+
+/* formatta la distanza a piedi fermata→istituto, gestendo correttamente il caso 0 mt ("proprio davanti") */
+function formatMeters(school, stopName) {
+  if (!school.stopMeters || school.stopMeters[stopName] === undefined) return '';
+  const meters = school.stopMeters[stopName];
+  const label = meters === 0 ? 'Proprio davanti l\'ingresso' : `${meters} mt a piedi`;
+  return ` <span class="walk-chip">🚶 ${label}</span>`;
+}
+
+const scuole = {
+  bersacchi_divittorio: {
+    nomeUfficiale: 'Scuola Primaria "Ezela Bersacchi Liberati" - Via G. di Vittorio',
+    stopNames: ['Via Di Vittorio'],
+    stopMeters: { 'Via Di Vittorio': 50 },
+    entrata: '08:00',
+    classi: {
+      '1A': { lun:'13:00', mar:'13:00', mer:'14:00', gio:'14:00', ven:'13:00' },
+      '1B': ogniGiorno('16:00'),
+      '1C': ogniGiorno('16:00'),
+      '1D': ogniGiorno('16:00'),
+      '2B': ogniGiorno('16:00'),
+      '2C': ogniGiorno('16:00'),
+      '2D': ogniGiorno('16:00'),
+      '3A': { lun:'13:00', mar:'13:00', mer:'14:00', gio:'14:00', ven:'13:00' },
+      '3B': ogniGiorno('16:00'),
+      '3C': ogniGiorno('16:00'),
+      '3D': ogniGiorno('16:00'),
+      '3E': ogniGiorno('16:00'),
+      '4A': { lun:'14:00', mar:'13:00', mer:'14:00', gio:'14:00', ven:'13:00' },
+      '4B': ogniGiorno('16:00'),
+      '4C': ogniGiorno('16:00'),
+      '4D': ogniGiorno('16:00'),
+      '5A': { lun:'14:00', mar:'13:00', mer:'14:00', gio:'14:00', ven:'13:00' },
+      '5B': ogniGiorno('16:00'),
+      '5C': ogniGiorno('16:00'),
+      '5D': ogniGiorno('16:00')
+    }
+  },
+  giovagnoli_viaadda: {
+    nomeUfficiale: 'Istituto Comprensivo Statale Raffaello Giovagnoli - Distaccamento Via Adda',
+    stopNames: ['Piazza Santa Maria', 'Piazza Santa Maria (Ist. Superiore A. Frammartino)'],
+    stopMeters: { 'Piazza Santa Maria': 100, 'Piazza Santa Maria (Ist. Superiore A. Frammartino)': 50 },
+    entrata: '08:00',
+    classi: {
+      '4A': { lun:'14:00', mar:'13:00', mer:'14:00', gio:'14:00', ven:'13:00' },
+      '5A': { lun:'14:00', mar:'13:00', mer:'14:00', gio:'14:00', ven:'13:00' }
+    }
+  },
+  giovagnoli_borelli: {
+    nomeUfficiale: 'Istituto Comprensivo Raffaello Giovagnoli - Scuola dell\'Infanzia "R. Borelli" - Via Don Milani',
+    stopNames: ['Via dell\'Unione / Via Adige', 'Via Di Vittorio'],
+    stopMeters: { 'Via dell\'Unione / Via Adige': 200, 'Via Di Vittorio': 300 },
+    entrata: '08:30',
+    classi: {
+      'Tempo Ridotto (uscita 12:45-13:00)': ogniGiorno('12:45'),
+      'Tempo Pieno (uscita 15:30-16:00)': ogniGiorno('15:30')
+    }
+  },
+  catullo_classico: {
+    nomeUfficiale: 'Liceo Statale Gaio Valerio Catullo - Liceo Classico',
+    stopNames: ['Via Isonzo'],
+    stopMeters: { 'Via Isonzo': 230 },
+    entrata: '08:10',
+    classi: {
+      '1AC': { lun:'13:10', mar:'14:05', mer:'13:10', gio:'14:05', ven:'13:10' },
+      '1BC': { lun:'13:10', mar:'14:05', mer:'13:10', gio:'14:05', ven:'13:10' },
+      '2AC': { lun:'14:05', mar:'13:10', mer:'14:05', gio:'13:10', ven:'13:10' },
+      '2BC': { lun:'14:05', mar:'13:10', mer:'14:05', gio:'13:10', ven:'13:10' },
+      '3AC': { lun:'14:05', mar:'14:05', mer:'14:05', gio:'15:00', ven:'14:05' },
+      '3BC': { lun:'14:05', mar:'15:00', mer:'14:05', gio:'14:05', ven:'14:05' },
+      '4AC': { lun:'14:05', mar:'14:05', mer:'15:00', gio:'14:05', ven:'14:05' },
+      '4BC': { lun:'14:05', mar:'14:05', mer:'15:00', gio:'14:05', ven:'14:05' },
+      '5AC': { lun:'14:05', mar:'15:00', mer:'14:05', gio:'14:05', ven:'14:05' },
+      '5BC': { lun:'14:05', mar:'14:05', mer:'14:05', gio:'15:00', ven:'14:05' }
+    }
+  },
+  catullo_linguistico_su: {
+    nomeUfficiale: 'Liceo Statale Gaio Valerio Catullo - Liceo Linguistico/Scienze Umane',
+    stopNames: ['Via Isonzo'],
+    stopMeters: { 'Via Isonzo': 230 },
+    entrata: '08:10',
+    classi: {
+      'Prime': { lun:'13:10', mar:'14:05', mer:'13:10', gio:'14:05', ven:'13:10' },
+      'Seconde': { lun:'14:05', mar:'13:10', mer:'14:05', gio:'13:10', ven:'13:10' },
+      'Terze': ogniGiorno('14:05'),
+      'Quarte': ogniGiorno('14:05'),
+      'Quinte': ogniGiorno('14:05')
+    }
+  },
+  peano_scientifico: {
+    nomeUfficiale: 'Liceo Scientifico Statale "Giuseppe Peano"',
+    stopNames: ["Via dello Stadio / Via Sant'Anna di Stazzema", 'Via della Fonte (Stadio del Nuoto)', 'Piazza Pesciarelli'],
+    stopMeters: { "Via dello Stadio / Via Sant'Anna di Stazzema": 350, 'Via della Fonte (Stadio del Nuoto)': 0, 'Piazza Pesciarelli': 110 },
+    entrata: '08:10',
+    classi: {
+      'Tutte le classi (uscita 13:50)': ogniGiorno('13:50'),
+      'Alcune classi del biennio (uscita 13:00 — verifica con la tua classe)': ogniGiorno('13:00')
+    }
+  },
+  cardano_resistenza: {
+    nomeUfficiale: 'Istituto Superiore "G. Cardano" - Sede Piazza della Resistenza (Elettronica/Elettrotecnica/Meccatronica)',
+    stopNames: ['Via dello Stadio', 'Via della Fonte (Stadio del Nuoto)', "Via dell'Unione / Via Adige"],
+    stopMeters: { 'Via dello Stadio': 450, 'Via della Fonte (Stadio del Nuoto)': 550, "Via dell'Unione / Via Adige": 270 },
+    entrata: '08:00',
+    classi: {
+      'Tutte le classi': ogniGiorno('14:30')
+    }
+  },
+  cardano_viatirso: {
+    nomeUfficiale: 'Istituto Superiore "G. Cardano" - Sede Via Tirso (CAT/AFM/RIM/SIA/Liceo Scientifico Scienze Applicate)',
+    stopNames: ['Via Isonzo'],
+    stopMeters: { 'Via Isonzo': 200 },
+    entrata: '08:00',
+    classi: {
+      'Tutte le classi': ogniGiorno('13:40')
+    }
+  }
+};
+
+function populateSchoolSelectors() {
+  const schoolSel = document.getElementById('school-select');
+  schoolSel.innerHTML = Object.entries(scuole)
+    .map(([key, s]) => `<option value="${key}">${s.nomeUfficiale}</option>`).join('');
+  onSchoolChange();
+}
+function onSchoolChange() {
+  const school = scuole[document.getElementById('school-select').value];
+  const classSel = document.getElementById('school-class');
+  classSel.innerHTML = Object.keys(school.classi)
+    .map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+let schoolFilter = 'entrambi';
+function setSchoolFilter(filter) {
+  schoolFilter = filter;
+  document.getElementById('school-filter-entrambi').classList.toggle('active', filter === 'entrambi');
+  document.getElementById('school-filter-ingresso').classList.toggle('active', filter === 'ingresso');
+  document.getElementById('school-filter-uscita').classList.toggle('active', filter === 'uscita');
+}
+
+/* ── motore di ricerca scuole: linee utili per ingresso (mattina) e uscita (pomeriggio) alla fermata associata ── */
+function runSchoolSearch() {
+  const school = scuole[document.getElementById('school-select').value];
+  const classKey = document.getElementById('school-class').value;
+  const day = document.getElementById('school-day').value;
+  const fromName = document.getElementById('school-from').value.trim();
+  const resultsEl = document.getElementById('school-results');
+  resultsEl.innerHTML = '';
+  if (!school || !classKey) return;
+
+  const entrataTime = school.entrata;
+  const uscitaTime = school.classi[classKey][day];
+  const stopNames = school.stopNames;
+  const stopNamesLower = stopNames.map(n => n.toLowerCase());
+
+  const arrivals = [];
+  const departures = [];
+
+  Object.entries(lines).forEach(([lineKey, lineObj]) => {
+    ['andata', 'ritorno'].forEach(dir => {
+      const data = lineObj[dir];
+      if (!data) return;
+      data.stops.forEach((s, idx) => {
+        if (!stopNamesLower.includes(s.name.toLowerCase())) return;
+        if (fromName) {
+          const idxFrom = data.stops.findIndex(x => x.name.toLowerCase() === fromName.toLowerCase());
+          if (idxFrom === -1 || idxFrom >= idx) return;
+        }
+        const times = s.lv || [];
+        const before = times.filter(t => t <= entrataTime).slice(-3);
+        if (before.length) arrivals.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: before, stopName: s.name });
+        if (uscitaTime) {
+          const after = times.filter(t => t >= uscitaTime).slice(0, 3);
+          if (after.length) departures.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: after, stopName: s.name });
+        }
+      });
+    });
+  });
+
+  function renderGroup(title, list, emptyMsg) {
+    let html = `<div class="school-group-title">${title}</div>`;
+    if (list.length === 0) {
+      html += `<div class="search-results-empty">${emptyMsg}</div>`;
+    } else {
+      html += '<div class="search-results">' + list.map(m => `
+        <div class="search-result-card" data-linekey="${m.lineKey}" data-dir="${m.dir}">
+          <div class="search-result-line">${m.lineName}</div>
+          <div class="search-result-route">${m.routeLabel}</div>
+          <div class="search-result-times">${m.times.map(t => `<span class="t-chip">${t}</span>`).join('')}</div>
+          ${formatMeters(school, m.stopName) ? `<div class="search-result-walk">${formatMeters(school, m.stopName).trim()}</div>` : ''}
+          <div class="search-result-note">Fermata: ${m.stopName} · tocca per vedere tutta la linea</div>
+        </div>`).join('') + '</div>';
+    }
+    return html;
+  }
+
+  const stopNamesLabel = stopNames.map(n => `<strong>${n}</strong>${formatMeters(school, n)}`).join(' oppure ');
+  let html = `<div class="school-info-note">Fermat${stopNames.length > 1 ? 'e di riferimento' : 'a di riferimento'}: ${stopNamesLabel} — <strong>${classKey}</strong>: entrata ${entrataTime}${uscitaTime ? `, uscita ${uscitaTime}` : ' — orario di uscita non ancora disponibile per questo giorno'}${fromName ? ` — solo linee da <strong>${fromName}</strong>` : ''}</div>`;
+  if (schoolFilter !== 'uscita') {
+    html += renderGroup('🚏 Per l\'ingresso (mattina)', arrivals, 'Nessun autobus trovato in orario utile per l\'ingresso.');
+  }
+  if (schoolFilter !== 'ingresso') {
+    html += uscitaTime
+      ? renderGroup('🏫 Per l\'uscita (pomeriggio)', departures, 'Nessun autobus trovato in orario utile per l\'uscita.')
+      : `<div class="school-group-title">🏫 Per l'uscita (pomeriggio)</div><div class="search-results-empty">Orario di uscita non ancora disponibile per questa classe in questo giorno — verrà aggiunto appena disponibile.</div>`;
+  }
+  resultsEl.innerHTML = html;
+
+  resultsEl.querySelectorAll('.search-result-card').forEach(card => {
+    card.addEventListener('click', () => openLineFromSearch(card.dataset.linekey, card.dataset.dir));
+  });
 }
 
 /* ── elenco fermate univoco, ricavato da tutte le linee ── */
@@ -2382,6 +2797,7 @@ function getAllStopNames() {
   return Array.from(set).sort((a, b) => a.localeCompare(b, 'it'));
 }
 const ALL_STOPS = getAllStopNames();
+const ALL_STOPS_FROM = ['Qualsiasi fermata', ...ALL_STOPS];
 
 const ALL_TIMES = (() => {
   const out = ['Qualsiasi orario', 'Adesso'];
@@ -2428,8 +2844,10 @@ function wireAutocomplete(inputId, listId, source) {
     if (!input.parentElement.contains(e.target)) list.classList.remove('open');
   });
 }
-wireAutocomplete('search-from', 'search-from-list', ALL_STOPS);
-wireAutocomplete('search-to', 'search-to-list', ALL_STOPS);
+wireAutocomplete('search-from', 'search-from-list', ALL_STOPS_FROM);
+const ALL_STOPS_TO = [...ALL_STOPS, ...Object.values(scuole).map(s => s.nomeUfficiale)];
+wireAutocomplete('search-to', 'search-to-list', ALL_STOPS_TO);
+wireAutocomplete('school-from', 'school-from-list', ALL_STOPS);
 wireAutocomplete('search-time', 'search-time-list', ALL_TIMES);
 
 document.getElementById('search-swap').addEventListener('click', () => {
@@ -2448,16 +2866,21 @@ function setSearchDay(day) {
 /* ── motore di ricerca: solo percorsi diretti sulla stessa linea (v1) ── */
 function runStopSearch() {
   const fromName = document.getElementById('search-from').value.trim();
-  const toName = document.getElementById('search-to').value.trim();
+  const toNameRaw = document.getElementById('search-to').value.trim();
+  const toSchool = Object.values(scuole).find(s => s.nomeUfficiale.toLowerCase() === toNameRaw.toLowerCase());
+  const toNames = toSchool ? toSchool.stopNames : [toNameRaw];
+  const toNamesLower = toNames.map(n => n.toLowerCase());
   const timeInput = document.getElementById('search-time').value.trim();
   const resultsEl = document.getElementById('search-results');
   resultsEl.innerHTML = '';
 
-  if (!fromName || !toName) {
-    resultsEl.innerHTML = '<div class="search-results-empty">Inserisci sia la fermata di partenza sia quella di arrivo.</div>';
+  const anyFrom = fromName.toLowerCase() === 'qualsiasi fermata';
+
+  if (!toNameRaw || (!fromName && !anyFrom)) {
+    resultsEl.innerHTML = '<div class="search-results-empty">Inserisci almeno la fermata di arrivo (e la partenza, oppure "Qualsiasi fermata").</div>';
     return;
   }
-  if (fromName.toLowerCase() === toName.toLowerCase()) {
+  if (!anyFrom && toNamesLower.includes(fromName.toLowerCase())) {
     resultsEl.innerHTML = '<div class="search-results-empty">Partenza e arrivo coincidono.</div>';
     return;
   }
@@ -2476,25 +2899,40 @@ function runStopSearch() {
     ['andata', 'ritorno'].forEach(dir => {
       const data = lineObj[dir];
       if (!data) return;
-      const idxFrom = data.stops.findIndex(s => s.name.toLowerCase() === fromName.toLowerCase());
-      const idxTo = data.stops.findIndex(s => s.name.toLowerCase() === toName.toLowerCase());
-      if (idxFrom === -1 || idxTo === -1 || idxFrom >= idxTo) return;
+      const idxTo = data.stops.findIndex(s => toNamesLower.includes(s.name.toLowerCase()));
+      if (idxTo === -1) return;
 
-      let times = data.stops[idxFrom][searchDay] || [];
+      let refIdx = idxTo;
+      if (!anyFrom) {
+        const idxFrom = data.stops.findIndex(s => s.name.toLowerCase() === fromName.toLowerCase());
+        if (idxFrom === -1 || idxFrom >= idxTo) return;
+        refIdx = idxFrom;
+      }
+
+      let times = data.stops[refIdx][searchDay] || [];
       if (threshold) times = times.filter(t => t >= threshold);
       if (times.length === 0) return;
 
-      matches.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: times.slice(0, 6) });
+      matches.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: times.slice(0, 6), anyFrom });
     });
   });
 
   if (matches.length === 0) {
-    resultsEl.innerHTML = `
-      <div class="search-results-empty">
-        Nessuna linea diretta trovata tra queste due fermate${threshold ? ' dopo le ' + threshold : ''}.<br>
-        Al momento la ricerca copre solo i percorsi diretti sulla stessa linea — se serve un cambio, non è ancora supportato.
-      </div>`;
+    resultsEl.innerHTML = anyFrom
+      ? `<div class="search-results-empty">Nessuna linea trovata che passa per questa fermata${threshold ? ' dopo le ' + threshold : ''}.</div>`
+      : `<div class="search-results-empty">
+           Nessuna linea diretta trovata tra queste due fermate${threshold ? ' dopo le ' + threshold : ''}.<br>
+           Al momento la ricerca copre solo i percorsi diretti sulla stessa linea — se serve un cambio, non è ancora supportato.
+         </div>`;
     return;
+  }
+
+  if (toSchool) {
+    const note = document.createElement('div');
+    note.className = 'school-info-note';
+    const toStopsLabel = toSchool.stopNames.map(n => n + formatMeters(toSchool, n)).join(' oppure ');
+    note.innerHTML = `Risultati per la fermata più vicina a "<strong>${toSchool.nomeUfficiale}</strong>": ${toStopsLabel}`;
+    resultsEl.appendChild(note);
   }
 
   matches.forEach(m => {
@@ -2505,7 +2943,7 @@ function runStopSearch() {
       <div class="search-result-line">${m.lineName}</div>
       <div class="search-result-route">${m.routeLabel}</div>
       <div class="search-result-times">${m.times.map(t => `<span class="t-chip">${t}</span>`).join('')}</div>
-      <div class="search-result-note">Orario fermata di partenza · ${searchDay === 'lv' ? 'Lun–Ven' : 'Sabato'} · tocca per vedere tutta la linea</div>`;
+      <div class="search-result-note">${m.anyFrom ? 'Orario fermata' : 'Orario fermata di partenza'} · ${searchDay === 'lv' ? 'Lun–Ven' : 'Sabato'} · tocca per vedere tutta la linea</div>`;
     card.addEventListener('click', () => openLineFromSearch(m.lineKey, m.dir));
     resultsEl.appendChild(card);
   });
@@ -2523,6 +2961,7 @@ function openLineFromSearch(lineKey, dir) {
 // Init
 buildLineSelector();
 refreshView();
+populateSchoolSelectors();
 
 // Riadatta se la finestra viene ridimensionata
 window.addEventListener('resize', applyLayout);
