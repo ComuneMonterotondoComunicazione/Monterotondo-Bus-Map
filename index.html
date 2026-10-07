@@ -748,6 +748,10 @@ select.search-input option { color: #0a1f47; background: #fff; }
   font-size: 10.5px; color: var(--text-muted); margin-top: 6px; font-style: italic;
 }
 .search-result-walk { margin-top: 8px; }
+.search-result-warn {
+  margin-top: 8px; padding: 6px 9px; font-size: 11px; line-height: 1.4; color: #7a4a00;
+  background: #FFF4DC; border-left: 3px solid var(--gold); border-radius: 4px;
+}
 .walk-chip {
   display: inline-block; padding: 4px 11px; border-radius: 20px;
   background: rgba(var(--school-rgb),0.14); border: 1.5px solid rgba(var(--school-rgb),0.5);
@@ -1043,7 +1047,7 @@ body::after {
         <div>
           <div class="search-field-label" style="margin-top:0">Fermata di arrivo</div>
           <div class="autocomplete-wrap">
-            <input class="search-input" id="search-to" placeholder="Es. Piazza Pesciarelli" autocomplete="off">
+            <input class="search-input" id="search-to" placeholder="Es. Piazza Pesciarelli, oppure &quot;Qualsiasi fermata&quot;" autocomplete="off">
             <div class="autocomplete-list" id="search-to-list"></div>
           </div>
         </div>
@@ -2739,12 +2743,13 @@ function runSchoolSearch() {
           const idxFrom = data.stops.findIndex(x => x.name.toLowerCase() === fromName.toLowerCase());
           if (idxFrom === -1 || idxFrom >= idx) return;
         }
-        const times = s.lv || [];
-        const before = times.filter(t => t <= entrataTime).slice(-3);
-        if (before.length) arrivals.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: before, stopName: s.name });
+        const rIn = stopTimesWithFallback(data, idx, 'lv', 'next');
+        const before = rIn.times.filter(t => t <= entrataTime).slice(-3);
+        if (before.length) arrivals.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: before, stopName: s.name, via: rIn.via });
         if (uscitaTime) {
-          const after = times.filter(t => t >= uscitaTime).slice(0, 3);
-          if (after.length) departures.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: after, stopName: s.name });
+          const rOut = stopTimesWithFallback(data, idx, 'lv', 'prev');
+          const after = rOut.times.filter(t => t >= uscitaTime).slice(0, 3);
+          if (after.length) departures.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: after, stopName: s.name, via: rOut.via });
         }
       });
     });
@@ -2759,6 +2764,7 @@ function runSchoolSearch() {
         <div class="search-result-card" data-linekey="${m.lineKey}" data-dir="${m.dir}">
           <div class="search-result-line">${m.lineName}</div>
           <div class="search-result-route">${m.routeLabel}</div>
+          ${m.via ? `<div class="search-result-warn">Nessun orario indicato a «${m.stopName}»: orari indicativi a «${m.via}»</div>` : ''}
           <div class="search-result-times">${m.times.map(t => `<span class="t-chip">${t}</span>`).join('')}</div>
           ${formatMeters(school, m.stopName) ? `<div class="search-result-walk">${formatMeters(school, m.stopName).trim()}</div>` : ''}
           <div class="search-result-note">Fermata: ${m.stopName} · tocca per vedere tutta la linea</div>
@@ -2845,7 +2851,7 @@ function wireAutocomplete(inputId, listId, source) {
   });
 }
 wireAutocomplete('search-from', 'search-from-list', ALL_STOPS_FROM);
-const ALL_STOPS_TO = [...ALL_STOPS, ...Object.values(scuole).map(s => s.nomeUfficiale)];
+const ALL_STOPS_TO = ['Qualsiasi fermata', ...ALL_STOPS, ...Object.values(scuole).map(s => s.nomeUfficiale)];
 wireAutocomplete('search-to', 'search-to-list', ALL_STOPS_TO);
 wireAutocomplete('school-from', 'school-from-list', ALL_STOPS);
 wireAutocomplete('search-time', 'search-time-list', ALL_TIMES);
@@ -2863,6 +2869,20 @@ function setSearchDay(day) {
   document.getElementById('search-day-sab').classList.toggle('active', day === 'sab');
 }
 
+/* orari di una fermata; se la fermata non ha alcun orario nei dati ASTRAL usa la fermata con orario più vicina nel verso di marcia ('next') o all'indietro ('prev') */
+function stopTimesWithFallback(data, idx, day, prefer) {
+  const s = data.stops[idx];
+  if (s.lv.length || s.sab.length) return { times: s[day] || [], via: null, nodata: false };
+  const order = prefer === 'prev' ? [-1, 1] : [1, -1];
+  for (const step of order) {
+    for (let j = idx + step; j >= 0 && j < data.stops.length; j += step) {
+      const t = data.stops[j][day] || [];
+      if (t.length) return { times: t, via: data.stops[j].name, nodata: false };
+    }
+  }
+  return { times: [], via: null, nodata: true };
+}
+
 /* ── motore di ricerca: solo percorsi diretti sulla stessa linea (v1) ── */
 function runStopSearch() {
   const fromName = document.getElementById('search-from').value.trim();
@@ -2875,12 +2895,18 @@ function runStopSearch() {
   resultsEl.innerHTML = '';
 
   const anyFrom = fromName.toLowerCase() === 'qualsiasi fermata';
+  const anyTo = toNameRaw.toLowerCase() === 'qualsiasi fermata';
+  const anyStop = anyFrom || anyTo;
 
-  if (!toNameRaw || (!fromName && !anyFrom)) {
-    resultsEl.innerHTML = '<div class="search-results-empty">Inserisci almeno la fermata di arrivo (e la partenza, oppure "Qualsiasi fermata").</div>';
+  if (!toNameRaw || !fromName) {
+    resultsEl.innerHTML = '<div class="search-results-empty">Inserisci la fermata di partenza e quella di arrivo (in uno dei due campi puoi scegliere "Qualsiasi fermata").</div>';
     return;
   }
-  if (!anyFrom && toNamesLower.includes(fromName.toLowerCase())) {
+  if (anyFrom && anyTo) {
+    resultsEl.innerHTML = '<div class="search-results-empty">Scegli almeno una fermata: "Qualsiasi fermata" si può usare in un solo campo.</div>';
+    return;
+  }
+  if (!anyStop && toNamesLower.includes(fromName.toLowerCase())) {
     resultsEl.innerHTML = '<div class="search-results-empty">Partenza e arrivo coincidono.</div>';
     return;
   }
@@ -2899,26 +2925,32 @@ function runStopSearch() {
     ['andata', 'ritorno'].forEach(dir => {
       const data = lineObj[dir];
       if (!data) return;
-      const idxTo = data.stops.findIndex(s => toNamesLower.includes(s.name.toLowerCase()));
-      if (idxTo === -1) return;
 
-      let refIdx = idxTo;
-      if (!anyFrom) {
-        const idxFrom = data.stops.findIndex(s => s.name.toLowerCase() === fromName.toLowerCase());
-        if (idxFrom === -1 || idxFrom >= idxTo) return;
-        refIdx = idxFrom;
+      const pushMatch = (refIdx) => {
+        const r = stopTimesWithFallback(data, refIdx, searchDay, 'next');
+        let times = r.times;
+        if (threshold) times = times.filter(t => t >= threshold);
+        if (times.length === 0 && !r.nodata) return;
+        matches.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: times.slice(0, 6), anyStop,
+                       refName: data.stops[refIdx].name, via: r.via, nodata: r.nodata });
+      };
+
+      if (anyStop) {
+        const names = anyFrom ? toNamesLower : [fromName.toLowerCase()];
+        data.stops.forEach((s, idx) => { if (names.includes(s.name.toLowerCase())) pushMatch(idx); });
+        return;
       }
 
-      let times = data.stops[refIdx][searchDay] || [];
-      if (threshold) times = times.filter(t => t >= threshold);
-      if (times.length === 0) return;
-
-      matches.push({ lineKey, dir, lineName: lineObj.name, routeLabel: data.routeLabel, times: times.slice(0, 6), anyFrom });
+      const idxTo = data.stops.findIndex(s => toNamesLower.includes(s.name.toLowerCase()));
+      if (idxTo === -1) return;
+      const idxFrom = data.stops.findIndex(s => s.name.toLowerCase() === fromName.toLowerCase());
+      if (idxFrom === -1 || idxFrom >= idxTo) return;
+      pushMatch(idxFrom);
     });
   });
 
   if (matches.length === 0) {
-    resultsEl.innerHTML = anyFrom
+    resultsEl.innerHTML = anyStop
       ? `<div class="search-results-empty">Nessuna linea trovata che passa per questa fermata${threshold ? ' dopo le ' + threshold : ''}.</div>`
       : `<div class="search-results-empty">
            Nessuna linea diretta trovata tra queste due fermate${threshold ? ' dopo le ' + threshold : ''}.<br>
@@ -2942,8 +2974,9 @@ function runStopSearch() {
     card.innerHTML = `
       <div class="search-result-line">${m.lineName}</div>
       <div class="search-result-route">${m.routeLabel}</div>
-      <div class="search-result-times">${m.times.map(t => `<span class="t-chip">${t}</span>`).join('')}</div>
-      <div class="search-result-note">${m.anyFrom ? 'Orario fermata' : 'Orario fermata di partenza'} · ${searchDay === 'lv' ? 'Lun–Ven' : 'Sabato'} · tocca per vedere tutta la linea</div>`;
+      ${m.via ? `<div class="search-result-warn">Nessun orario indicato a «${m.refName}»: orari indicativi a «${m.via}»</div>` : (m.nodata ? `<div class="search-result-warn">Orari non indicati per «${m.refName}»: apri la linea per vedere le fermate con orario</div>` : '')}
+      ${m.times.length ? `<div class="search-result-times">${m.times.map(t => `<span class="t-chip">${t}</span>`).join('')}</div>` : ''}
+      <div class="search-result-note">${m.anyStop ? 'Orario fermata' : 'Orario fermata di partenza'} · ${searchDay === 'lv' ? 'Lun–Ven' : 'Sabato'} · tocca per vedere tutta la linea</div>`;
     card.addEventListener('click', () => openLineFromSearch(m.lineKey, m.dir));
     resultsEl.appendChild(card);
   });
