@@ -561,6 +561,8 @@ body {
   #search-mode .search-results-empty { grid-column: 1 / -1; padding: 30px 4px; font-size: 14px; }
   .search-result-card { margin-top: 0; }
 
+  #search-mode .search-results > .school-info-note, #search-mode .search-results > .transfer-list { grid-column: 1 / -1; max-width: none; }
+  .transfer-list { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); }
   #school-mode { padding: 36px 32px 48px; }
   #school-mode .search-results {
     width: 100%; max-width: 900px; margin: 0 auto;
@@ -747,6 +749,22 @@ select.search-input option { color: #0a1f47; background: #fff; }
 .search-result-note {
   font-size: 10.5px; color: var(--text-muted); margin-top: 6px; font-style: italic;
 }
+.transfer-list { display: grid; gap: 14px; padding-top: 6px; }
+.transfer-intro { padding-left: 0; padding-right: 0; }
+.transfer-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: #fff; box-shadow: 0 2px 10px rgba(13,50,112,0.06); }
+.transfer-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; font-family: 'Barlow Condensed', sans-serif; }
+.transfer-n { font-weight: 800; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+.transfer-total { font-weight: 700; font-size: 16px; color: var(--blue-dark); }
+.transfer-total b { font-weight: 900; }
+.transfer-leg { display: flex; gap: 10px; align-items: flex-start; padding: 9px 10px; border-radius: 9px; cursor: pointer; background: var(--blue-light); transition: box-shadow 0.15s; }
+.transfer-leg:hover { box-shadow: inset 0 0 0 2px var(--gold); }
+.leg-num { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--blue-dark); color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.leg-line { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 15px; color: var(--blue-dark); text-transform: uppercase; }
+.leg-route { font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 11px; color: var(--text-muted); text-transform: none; margin-left: 4px; }
+.leg-stops { font-size: 13px; color: var(--text-primary); margin-top: 3px; line-height: 1.7; }
+.leg-stops b { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px; color: var(--blue-dark); background: #fff; padding: 1px 7px; border-radius: 5px; margin: 0 2px; }
+.transfer-wait { margin: 8px 0; padding: 8px 10px; border-radius: 9px; background: #FFF4DC; border: 1.5px dashed #E0A800; font-size: 12.5px; color: #6b4300; line-height: 1.8; }
+.wait-chip { display: inline-block; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 14px; letter-spacing: 0.03em; text-transform: uppercase; color: #fff; background: linear-gradient(150deg, #FFB34D, #E07B00); padding: 3px 11px; border-radius: 20px; margin-right: 6px; }
 .search-result-walk { margin-top: 8px; }
 .search-result-warn {
   margin-top: 8px; padding: 6px 9px; font-size: 11px; line-height: 1.4; color: #7a4a00;
@@ -1184,7 +1202,7 @@ const linea3_andata = {
     { name:"Via Gramsci / Via Monti Sabini", type:"stop",
       lv:["05:42","07:47","08:57","10:42","11:22","12:27","13:52","14:57","15:37","18:17","20:02"],
       sab:["05:42","07:47","10:42","12:27","14:57","18:17","20:02"] },
-    { name:"Via Grandi", type:"stop",
+    { name:"Via Achille Grandi", type:"stop",
       lv:["05:43","07:48","08:58","10:43","11:23","12:28","13:53","14:58","15:38","18:18","20:03"],
       sab:["05:43","07:48","10:43","12:28","14:58","18:18","20:03"] },
     { name:"Via Turati / Via Terminillo", type:"key",
@@ -1590,7 +1608,7 @@ const linea30_andata = {
     { name:"Via Gramsci / Via Monti Sabini", type:"stop",
       lv:["08:07","10:06","13:16","15:51","18:41","20:41"],
       sab:["07:56","10:06","13:16","15:51","18:41","20:41"] },
-    { name:"Via Monti Sabini / Via Grandi", type:"stop",
+    { name:"Via Monti Sabini / Via Achille Grandi", type:"stop",
       lv:["08:08","10:07","13:17","15:52","18:42","20:42"],
       sab:["07:57","10:07","13:17","15:52","18:42","20:42"] },
     { name:"Via Monti Sabini", type:"stop",
@@ -1628,7 +1646,7 @@ const linea30_ritorno = {
     { name:"Via Monti Sabini", type:"stop",
       lv:["06:22","08:37","11:37","14:02","17:07","19:07"],
       sab:["06:22","08:37","11:37","14:02","17:07","19:07"] },
-    { name:"Via Monti Sabini / Via Grandi", type:"stop",
+    { name:"Via Monti Sabini / Via Achille Grandi", type:"stop",
       lv:["06:23","08:38","11:38","14:03","17:08","19:08"],
       sab:["06:23","08:38","11:38","14:03","17:08","19:08"] },
     { name:"Via Gramsci / Via Monti Sabini", type:"stop",
@@ -1722,7 +1740,7 @@ const linea25_andata = {
     { name:"Via Gramsci / Via Monti Sabini", type:"stop",
       lv:["06:25","07:10","07:55","08:35","09:35","10:35","11:35","12:30","14:00","14:45","15:45","17:30","19:30","21:05","22:50"],
       sab:["06:25","07:55","09:35","11:35","14:00","15:45","17:30","19:30","21:05","22:50"] },
-    { name:"Via Grandi", type:"stop",
+    { name:"Via Achille Grandi", type:"stop",
       lv:["06:27","07:12","07:57","08:37","09:37","10:37","11:37","12:32","14:02","14:47","15:47","17:32","19:32","21:07","22:52"],
       sab:["06:27","07:57","09:37","11:37","14:02","15:47","17:32","19:32","21:07","22:52"] },
     { name:"Via Turati / Via Terminillo", type:"stop",
@@ -1793,7 +1811,7 @@ const linea25_ritorno = {
     { name:"Via Turati / Via Terminillo", type:"stop",
       lv:["06:57","07:42","08:22","09:02","10:02","11:12","12:27","13:27","14:52","15:12","16:17","18:27","20:07","22:02","23:47"],
       sab:["06:57","08:22","10:02","12:27","14:52","16:17","18:27","20:07","22:02","23:47"] },
-    { name:"Via Grandi", type:"stop",
+    { name:"Via Achille Grandi", type:"stop",
       lv:["06:59","07:44","08:24","09:04","10:04","11:14","12:29","13:29","14:54","15:14","16:19","18:29","20:09","22:04","23:49"],
       sab:["06:59","08:24","10:04","12:29","14:54","16:19","18:29","20:09","22:04","23:49"] },
     { name:"Via Gramsci / Via Monti Sabini", type:"stop",
@@ -2870,12 +2888,13 @@ function setSearchDay(day) {
 }
 
 /* orari di una fermata; se la fermata non ha alcun orario nei dati ASTRAL usa la fermata con orario più vicina nel verso di marcia ('next') o all'indietro ('prev') */
-function stopTimesWithFallback(data, idx, day, prefer) {
+function stopTimesWithFallback(data, idx, day, prefer, opts) {
   const s = data.stops[idx];
   if (s.lv.length || s.sab.length) return { times: s[day] || [], via: null, nodata: false };
+  const strict = !!(opts && opts.strict), maxGap = (opts && opts.maxGap) || Infinity;
   const order = prefer === 'prev' ? [-1, 1] : [1, -1];
-  for (const step of order) {
-    for (let j = idx + step; j >= 0 && j < data.stops.length; j += step) {
+  for (const step of (strict ? [order[0]] : order)) {
+    for (let j = idx + step, g = 1; j >= 0 && j < data.stops.length && g <= maxGap; j += step, g++) {
       const t = data.stops[j][day] || [];
       if (t.length) return { times: t, via: data.stops[j].name, nodata: false };
     }
@@ -2883,7 +2902,165 @@ function stopTimesWithFallback(data, idx, day, prefer) {
   return { times: [], via: null, nodata: true };
 }
 
-/* ── motore di ricerca: solo percorsi diretti sulla stessa linea (v1) ── */
+/* ═══════════════════════════════════════
+   COLLEGAMENTI CON UN CAMBIO (quando non c'è una linea diretta)
+═══════════════════════════════════════ */
+const MIN_CAMBIO_STESSA_FERMATA = 3;  // minuti minimi di cambio se la 2ª linea parte dalla stessa fermata di arrivo
+const MIN_CAMBIO_MIN = 5;      // minuti minimi di cambio (più i minuti a piedi) se serve spostarsi a un'altra fermata
+const MAX_ATTESA_MIN = 90;     // oltre questa attesa la coincidenza non viene proposta
+const MAX_TRATTA_MIN = 150;    // durata massima plausibile di una singola tratta
+const MAX_SOLUZIONI = 6;
+// [fermataA, fermataB, minutiAPiedi]: cambio a piedi tra fermate con nome diverso (distanze indicate dal Comune)
+const FERMATE_VICINE = [
+  ['Piazza Santa Maria', 'Piazza Santa Maria (Ist. Superiore A. Frammartino)', 1],
+  ['Via dello Stadio', "Via dello Stadio / Via Sant'Anna di Stazzema", 1],
+  ['Via Corsica', 'Viale B. Buozzi / Via Corsica', 1],
+  ['Via Adige', "Via dell'Unione / Via Adige", 2],
+  ['Via Nenni / Viale Buozzi', 'Via Nenni 14', 2],
+  ['Via Nenni / Viale Buozzi', 'Viale B. Buozzi / Via Corsica', 1],
+  ['Via Achille Grandi', 'Via Monti Sabini / Via Achille Grandi', 2],
+  ['Via Monti Sabini', 'Via Monti Sabini / Via Achille Grandi', 2],
+  ['Via F. Cecconi (Convento Cappuccini)', 'Viale Cecconi 4', 1],
+  ['Via Turati / Via Nilde Iotti', 'Via Turati / Via Terminillo', 2],
+  ['Chiesa San Martino', 'San Martino', 2],
+  ['Chiesa San Martino', 'Via San Martino, 200', 2],
+  ['San Martino', 'Via San Martino / Via Montedoro', 3],
+  ["Via San Martino / Sant'Anzino", 'Via San Martino, 200', 5],
+  ['Via Da Vinci / Amaldi (Q8)', 'Via Leonardo da Vinci / Via A. Meucci', 3],
+  ['Piazza Pesciarelli', "Via dell'Unione / Via Trebbia", 2],
+  ['Piazza Pesciarelli', "Via dell'Unione / Via Adige", 2],
+  ["Via dell'Unione / Via Trebbia", "Via dell'Unione / Via Adige", 1],
+  ['Piazza Pesciarelli', 'Via della Fonte (Stadio del Nuoto)', 1],
+  ['Via della Fonte (Stadio del Nuoto)', "Via dello Stadio / Via Sant'Anna di Stazzema", 1],
+  ["Via dell'Unione / Via Adige", 'Via Di Vittorio', 4],
+  ['Via Di Vittorio', 'Cimitero Vecchio', 10],
+  ['Cimitero Vecchio', 'Via Isonzo', 8],
+  ['Via Isonzo', 'Via Dino Pompili / Via Piave', 2],
+  ['Via Gramsci / Via Volturno', 'Via Gramsci / Via Monti Sabini', 2],
+  ['Via Kennedy', 'Viale XXV Aprile', 1],
+  ['Via Matteotti', 'Viale XXV Aprile', 2],
+  ['Via dei Pini (Ospedale Gonfalone)', 'Via Matteotti', 4],
+  ['Piazza Santa Maria (Ist. Superiore A. Frammartino)', 'Via San Martino / Via Montedoro', 8]
+];
+
+function toMin(t) { const p = t.split(':'); return +p[0] * 60 + +p[1]; }
+function fmtDur(m) { return m >= 60 ? Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0') + ' min' : m + ' min'; }
+function nearbyStops(name) {
+  const out = {}; out[name] = 0;
+  FERMATE_VICINE.forEach(([a, b, w]) => { if (a === name) out[b] = w; if (b === name) out[a] = w; });
+  return out;
+}
+function sortedTimes(r) { return r.times.slice().sort((x, y) => toMin(x) - toMin(y)); }
+function idxAtOrAfter(arr, minutes, maxDelta) {
+  for (let i = 0; i < arr.length; i++) { const m = toMin(arr[i]); if (m >= minutes) return m - minutes <= maxDelta ? i : -1; }
+  return -1;
+}
+/* orario di arrivo della stessa corsa: se i due elenchi hanno la stessa lunghezza si abbinano per posizione, altrimenti si prende il primo passaggio successivo */
+function matchArrival(depArr, k, arrArr) {
+  const dm = toMin(depArr[k]);
+  const i = arrArr.length === depArr.length ? k : idxAtOrAfter(arrArr, dm, MAX_TRATTA_MIN);
+  if (i < 0) return null;
+  const am = toMin(arrArr[i]);
+  return (am >= dm && am - dm <= MAX_TRATTA_MIN) ? { t: arrArr[i], m: am } : null;
+}
+/* stime ammesse solo nel verso "sicuro" e per al massimo 3 fermate: mai un arrivo troppo presto o una partenza troppo tardi */
+const STRICT = { strict: true, maxGap: 3 };
+
+function findTransferItineraries(fromName, toNamesLower, day, threshold) {
+  const fromLower = fromName.toLowerCase();
+  const entries = [];
+  Object.entries(lines).forEach(([lineKey, lineObj]) => ['andata', 'ritorno'].forEach(dir => {
+    if (lineObj[dir]) entries.push({ lineKey, dir, lineName: lineObj.name, data: lineObj[dir] });
+  }));
+  const found = [];
+  entries.forEach(A => {
+    A.data.stops.forEach((sF, iF) => {
+      if (sF.name.toLowerCase() !== fromLower) return;
+      const rDep = stopTimesWithFallback(A.data, iF, day, 'prev', STRICT);
+      const depAll = sortedTimes(rDep);
+      if (!depAll.length) return;
+      for (let iT = iF + 1; iT < A.data.stops.length; iT++) {
+        const t1 = A.data.stops[iT];
+        const rArr = stopTimesWithFallback(A.data, iT, day, 'next', STRICT);
+        if (!rArr.times.length) continue;
+        const arrTimes = sortedTimes(rArr);
+        const near = nearbyStops(t1.name);
+        entries.forEach(B => {
+          if (B.lineKey === A.lineKey) return;
+          B.data.stops.forEach((t2, jT) => {
+            if (!(t2.name in near)) return;
+            const walk = near[t2.name];
+            const rDep2 = stopTimesWithFallback(B.data, jT, day, 'prev', STRICT);
+            if (!rDep2.times.length) return;
+            const dep2Times = sortedTimes(rDep2);
+            for (let jD = jT + 1; jD < B.data.stops.length; jD++) {
+              if (!toNamesLower.includes(B.data.stops[jD].name.toLowerCase())) continue;
+              const rDest = stopTimesWithFallback(B.data, jD, day, 'next', STRICT);
+              if (!rDest.times.length) continue;
+              const destTimes = sortedTimes(rDest);
+              depAll.forEach((t0, k) => {
+                if (threshold && t0 < threshold) return;
+                const a = matchArrival(depAll, k, arrTimes); if (!a) return;
+                const kb = idxAtOrAfter(dep2Times, a.m + (walk === 0 ? MIN_CAMBIO_STESSA_FERMATA : MIN_CAMBIO_MIN + walk), MAX_ATTESA_MIN); if (kb < 0) return;
+                const c = matchArrival(dep2Times, kb, destTimes); if (!c) return;
+                found.push({ A, B, from: sF.name, change1: t1.name, change2: t2.name, walk, dest: B.data.stops[jD].name,
+                  dep: t0, depM: toMin(t0), arr1: a.t, arr1M: a.m, dep2: dep2Times[kb], dep2M: toMin(dep2Times[kb]), arrDest: c.t, arrDestM: c.m,
+                  approx: !!(rDep.via || rArr.via || rDep2.via || rDest.via) });
+              });
+            }
+          });
+        });
+      }
+    });
+  });
+  found.sort((x, y) => x.arrDestM - y.arrDestM || y.depM - x.depM || x.dep2M - y.dep2M);
+  const best = [];
+  found.forEach(f => {
+    if (f.arrDestM - f.depM > 240) return;
+    if (!best.some(b => b.depM >= f.depM && b.arrDestM <= f.arrDestM)) best.push(f);
+  });
+  best.sort((x, y) => x.depM - y.depM || x.arrDestM - y.arrDestM);
+  return best;
+}
+
+function transferLegHtml(n, entry, fromStop, tFrom, toStop, tTo) {
+  return '<div class="transfer-leg" data-linekey="' + entry.lineKey + '" data-dir="' + entry.dir + '" title="Apri questa linea con tutte le fermate e gli orari">' +
+    '<div class="leg-num">' + n + '</div><div class="leg-body">' +
+    '<div class="leg-line">' + entry.lineName + ' <span class="leg-route">' + entry.data.routeLabel + '</span></div>' +
+    '<div class="leg-stops"><span>' + fromStop + '</span> <b>' + tFrom + '</b> → <span>' + toStop + '</span> <b>' + tTo + '</b></div>' +
+    '</div></div>';
+}
+
+function schoolNoteHtml(school) {
+  const label = school.stopNames.map(n => n + formatMeters(school, n)).join(' oppure ');
+  return '<div class="school-info-note">Risultati per la fermata più vicina a "<strong>' + school.nomeUfficiale + '</strong>": ' + label + '</div>';
+}
+
+function renderTransfers(resultsEl, items, hasThreshold, prefixHtml) {
+  const shown = items.slice(0, MAX_SOLUZIONI);
+  let html = (prefixHtml || '') + '<div class="school-info-note transfer-intro">Nessuna linea diretta tra queste due fermate: ecco le soluzioni <strong>con un cambio</strong>.</div><div class="transfer-list">';
+  shown.forEach((f, i) => {
+    const waitOnly = f.dep2M - f.arr1M - f.walk;
+    const chip = f.walk ? '⏱ Cambio: ' + waitOnly + ' min di attesa + ' + f.walk + ' min a piedi' : '⏱ Attesa al cambio: ' + waitOnly + ' min';
+    const detail = f.walk ? 'Scendi a <b>' + f.change1 + '</b> e cammina fino a <b>' + f.change2 + '</b>' : 'Scendi a <b>' + f.change1 + '</b> e aspetta la linea successiva';
+    html += '<div class="transfer-card">' +
+      '<div class="transfer-head"><span class="transfer-n">Soluzione ' + (i + 1) + '</span><span class="transfer-total"><b>' + f.dep + '</b> → <b>' + f.arrDest + '</b> · ' + fmtDur(f.arrDestM - f.depM) + '</span></div>' +
+      transferLegHtml(1, f.A, f.from, f.dep, f.change1, f.arr1) +
+      '<div class="transfer-wait"><span class="wait-chip">' + chip + '</span> <span class="wait-detail">' + detail + '</span></div>' +
+      transferLegHtml(2, f.B, f.change2, f.dep2, f.dest, f.arrDest) +
+      (f.approx ? '<div class="search-result-warn">Alcuni orari sono indicativi: una fermata del percorso non ha orari nei dati ASTRAL.</div>' : '') +
+      '</div>';
+  });
+  html += '</div>';
+  if (items.length > shown.length) {
+    html += '<div class="school-info-note">Ci sono altre ' + (items.length - shown.length) + ' soluzioni più tardi: ' +
+      (hasThreshold ? 'sposta più avanti l\'orario di partenza per vederle.' : 'imposta "Parti dopo le" per vederle.') + '</div>';
+  }
+  resultsEl.innerHTML = html;
+  resultsEl.querySelectorAll('.transfer-leg').forEach(el => el.addEventListener('click', () => openLineFromSearch(el.dataset.linekey, el.dataset.dir)));
+}
+
+/* ── motore di ricerca: percorsi diretti; se non ce ne sono, soluzioni con un cambio ── */
 function runStopSearch() {
   const fromName = document.getElementById('search-from').value.trim();
   const toNameRaw = document.getElementById('search-to').value.trim();
@@ -2950,22 +3127,23 @@ function runStopSearch() {
   });
 
   if (matches.length === 0) {
+    if (!anyStop) {
+      const items = findTransferItineraries(fromName, toNamesLower, searchDay, threshold);
+      if (items.length) {
+        renderTransfers(resultsEl, items, !!threshold, toSchool ? schoolNoteHtml(toSchool) : '');
+        return;
+      }
+    }
     resultsEl.innerHTML = anyStop
       ? `<div class="search-results-empty">Nessuna linea trovata che passa per questa fermata${threshold ? ' dopo le ' + threshold : ''}.</div>`
       : `<div class="search-results-empty">
-           Nessuna linea diretta trovata tra queste due fermate${threshold ? ' dopo le ' + threshold : ''}.<br>
-           Al momento la ricerca copre solo i percorsi diretti sulla stessa linea — se serve un cambio, non è ancora supportato.
+           Nessun collegamento trovato tra queste due fermate, nemmeno con un cambio${threshold ? ' dopo le ' + threshold : ''}.<br>
+           Prova a cambiare giorno o a togliere il filtro sull'orario.
          </div>`;
     return;
   }
 
-  if (toSchool) {
-    const note = document.createElement('div');
-    note.className = 'school-info-note';
-    const toStopsLabel = toSchool.stopNames.map(n => n + formatMeters(toSchool, n)).join(' oppure ');
-    note.innerHTML = `Risultati per la fermata più vicina a "<strong>${toSchool.nomeUfficiale}</strong>": ${toStopsLabel}`;
-    resultsEl.appendChild(note);
-  }
+  if (toSchool) resultsEl.insertAdjacentHTML('beforeend', schoolNoteHtml(toSchool));
 
   matches.forEach(m => {
     const card = document.createElement('div');
